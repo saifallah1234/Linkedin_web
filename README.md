@@ -1,6 +1,7 @@
 # Project file structure 
 
-`/
+```
+/
 │
 ├── app.js
 ├── server.js
@@ -11,9 +12,7 @@
 │
 ├── models/
 │   ├── User.model.js
-│   ├── Skill.model.js
-│   ├── Experience.model.js
-│   ├── Project.model.js
+|   ├── Company.model.js
 │   ├── Post.model.js
 │   ├── Comment.model.js
 │   ├── Reaction.model.js
@@ -23,34 +22,13 @@
 │   ├── Notification.model.js
 │
 ├── routes/
-│   ├── auth.routes.js
-│   ├── user.routes.js
-│   ├── skill.routes.js
-│   ├── experience.routes.js
-│   ├── post.routes.js
-│   ├── job.routes.js
-│   ├── application.routes.js
-│   ├── message.routes.js
-│   ├── admin.routes.js
-│
 ├── services/
-│   ├── auth.service.js
-│   ├── user.service.js
-│   ├── cv.service.js
-│   ├── post.service.js
-│   ├── job.service.js
-│   ├── notification.service.js
-│
 ├── middlewares/
-│   ├── auth.middleware.js
-│   ├── role.middleware.js
-│   ├── upload.middleware.js
-│
 ├── utils/
-│   ├── pdf.generator.js
-│   ├── file.helper.js
-│
-└── uploads/`
+└── uploads/
+│   ├── videos/
+│   └── files/
+```
 
 # Models Reference
 
