@@ -1,0 +1,67 @@
+const mongoose = require('mongoose');
+
+// --- 1. Sub-Schemas (Embedded Objects) ---
+
+const projectSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  link: { type: String },
+  technologies: [{ type: String }] // Array of strings e.g. ["React", "Node"]
+});
+const educationSchema = new mongoose.Schema({
+  school: { type: String, required: true }, // e.g., "Harvard University"
+  degree: { type: String, required: true }, // e.g., "Bachelor's"
+  fieldOfStudy: { type: String, required: false }, // e.g., "Computer Science"
+  startDate: { type: Date, required: true },
+  endDate: { type: Date }, // null = Present (still studying)
+  grade: { type: String }, // e.g., "GPA 3.8"
+  description: { type: String }
+});
+
+const experienceSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  company: { type: String, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date }, // null = Current
+  description: { type: String }
+});
+
+const skillSchema = new mongoose.Schema({
+  name: { type: String, required: true }
+});
+
+const certificateSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  obtainedAt: { type: Date, default: Date.now }
+});
+
+const followingCompanySchema = new mongoose.Schema({
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  followedAt: { type: Date, default: Date.now }
+});
+
+// --- 2. Main User Schema ---
+
+const userSchema = new mongoose.Schema({
+  firstName: { type: String, required: true, trim: true },
+  lastName: { type: String, required: true, trim: true },
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true, 
+    lowercase: true, 
+    trim: true 
+  },
+  password: { type: String, required: true, select: false }, // Hidden by default
+  dateOfBirth: { type: Date },
+  image: { type: String, default: '' }, // URL to avatar
+  location: { type: String, required: true, trim: true },
+  // --- Embedded Arrays ---
+  followingCompanies: [followingCompanySchema],
+  education: [educationSchema],
+  projects: [projectSchema],
+  experiences: [experienceSchema],
+  skills: [skillSchema],
+  certificates: [certificateSchema],
+  createdAt: { type: Date, default: Date.now }}); // specific createdAt / updatedAt for the User
+
+module.exports = mongoose.model('User', userSchema);
