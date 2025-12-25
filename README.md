@@ -1,6 +1,7 @@
 # Project file structure 
 
-`/
+```
+/
 │
 ├── app.js
 ├── server.js
@@ -50,7 +51,8 @@
 │   ├── pdf.generator.js
 │   ├── file.helper.js
 │
-└── uploads/`
+└── uploads/
+```
 
 # Models Reference
 
