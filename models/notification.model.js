@@ -34,7 +34,7 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['new_post', 'reaction', 'comment', 'reply', 'job_offer']
+    enum: ['new_post', 'reaction', 'comment', 'reply', 'job_offer' , 'message']
   },
   
   // --- 4. RELATED ENTITY (What is this about?) ---

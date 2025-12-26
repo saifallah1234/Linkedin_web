@@ -1,5 +1,5 @@
 const JobOffer = require('../models/joboffer.model');
-const Message = require('../models/Message.model');
+const Message = require('../models/message.model');
 
 // Fix: Correct argument order (companyId first)
 exports.createJob = async (companyId, data) => {
@@ -33,8 +33,8 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
 
   // PROJET REQUIREMENT: Open a discussion
   await Message.create({
-    sender: userId,
-    receiver: job.companyId,
+    senderId: userId,
+    receiverId: job.companyId,
     content: `Hello, I've just applied for the "${job.title}" position. I'm looking forward to your feedback!`
   });
 

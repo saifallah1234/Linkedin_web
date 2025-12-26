@@ -2,8 +2,10 @@ const notificationService = require('../services/notification.service');
 
 exports.getNotifications = async (req, res) => {
   try {
-    // req.user.id comes from your auth middleware
-    const notifications = await notificationService.getUserNotifications(req.user.id);
+    const notifications = await notificationService.getUserNotifications(
+      req.user.id,
+      req.user.role
+    );
     res.status(200).json(notifications);
   } catch (err) {
     res.status(500).json({ message: err.message });

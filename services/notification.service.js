@@ -22,16 +22,22 @@ exports.createNotification = async (receiver, sender, type, entity) => {
   }
 };
 
-exports.getUserNotifications = async (userId) => {
-  return await Notification.find({ 'receiver.id': userId })
+exports.getUserNotifications = async (userId, userRole) => {
+  return await Notification.find({
+    'receiver.id': userId,
+    'receiver.type': userRole
+  })
     .sort({ createdAt: -1 })
-    .populate('sender.id') // Dynamically populates based on sender.type
-    .populate('entity.id'); // Dynamically populates based on entity.type
+    .populate('sender.id', 'name logo avatar')
+    .populate('entity.id');
 };
 
 exports.markAsRead = async (notificationId, userId) => {
   return await Notification.findOneAndUpdate(
-    { _id: notificationId, 'receiver.id': userId },
+    {
+      _id: notificationId,
+      'receiver.id': userId
+    },
     { isRead: true },
     { new: true }
   );
