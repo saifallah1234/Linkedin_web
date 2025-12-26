@@ -17,7 +17,7 @@
 │   ├── Comment.model.js
 │   ├── Reaction.model.js
 │   ├── JobOffer.model.js
-│   ├── Application.model.js
+│   ├── Connection.model.js
 │   ├── Message.model.js
 │   ├── Notification.model.js
 │

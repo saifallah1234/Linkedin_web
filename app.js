@@ -12,6 +12,9 @@ app.get("/", (req, res) => {
   res.send("✅ LinkedIn Clone API is running...");
 });
 
+app.use('/api/jobs', require('./routes/job.routes'));
+//app.use('/api/applications', require('./routes/application.routes'));
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
