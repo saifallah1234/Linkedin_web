@@ -14,10 +14,12 @@ const applicantSchema = new mongoose.Schema({
   
   // [NEW] Optional field for Video CV, Portfolio, or Cover Letter
   additionalAttachment: {
-    url: { type: String },
-    type: { 
-      type: String, 
-      enum: ['video', 'document', 'link', 'image'] 
+    path: {
+        type: String // ex: uploads/videos/video1.mp4
+    },
+     type: {
+        type: String,
+        enum: ['video', 'document', 'image']
     }
   },
 

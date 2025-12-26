@@ -1,0 +1,38 @@
+const Notification = require('../models/Notification.model');
+
+/**
+ * @param {Object} receiver - { id, type } ('User' or 'Company')
+ * @param {Object} sender - { id, type } ('User' or 'Company')
+ * @param {String} type - 'reaction', 'comment', etc.
+ * @param {Object} entity - { id, type } ('Post', 'Comment', 'JobOffer')
+ */
+exports.createNotification = async (receiver, sender, type, entity) => {
+  try {
+    // Don't notify if the sender is the same as the receiver
+    if (receiver.id.toString() === sender.id.toString()) return;
+
+    return await Notification.create({
+      receiver,
+      sender,
+      type,
+      entity
+    });
+  } catch (error) {
+    console.error("Notification Creation Error:", error);
+  }
+};
+
+exports.getUserNotifications = async (userId) => {
+  return await Notification.find({ 'receiver.id': userId })
+    .sort({ createdAt: -1 })
+    .populate('sender.id') // Dynamically populates based on sender.type
+    .populate('entity.id'); // Dynamically populates based on entity.type
+};
+
+exports.markAsRead = async (notificationId, userId) => {
+  return await Notification.findOneAndUpdate(
+    { _id: notificationId, 'receiver.id': userId },
+    { isRead: true },
+    { new: true }
+  );
+};

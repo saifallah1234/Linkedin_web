@@ -9,6 +9,7 @@ const mockProtect = (req, res, next) => {
   req.user = {
     id: DEV_USER_ID,
     role: 'Company' // or 'Company' depending on who you want to test as
+    
   };
 
   // 3. Continue to the controller

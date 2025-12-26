@@ -20,8 +20,8 @@ app.use('/connection',connection);
 app.use('/company',company);
 
 app.use('/api/jobs', require('./routes/job.routes'));
-//app.use('/api/applications', require('./routes/application.routes'));
-
+app.use('/api/messages', require('./routes/message.route')); // Added
+app.use('/api/notifications', require('./routes/notification.route')); // Added
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

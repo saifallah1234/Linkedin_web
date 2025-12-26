@@ -1,53 +1,27 @@
 const JobOffer = require('../models/joboffer.model');
+const Message = require('../models/Message.model');
 
-// Create job
-exports.createJob = async (data, companyId) => {
-  return JobOffer.create({
-    ...data,
-    companyId
-  });
+// Fix: Correct argument order (companyId first)
+exports.createJob = async (companyId, data) => {
+  return JobOffer.create({ ...data, companyId });
 };
 
-// Get all active jobs
-exports.getAllJobs = async () => {
-  return JobOffer.find({ isActive: true }).sort({ createdAt: -1 });
+exports.getAllJobs = async (filters = {}) => {
+  let query = { isActive: true };
+  if (filters.location) query.location = new RegExp(filters.location, 'i');
+  return JobOffer.find(query).sort({ createdAt: -1 }).populate('companyId', 'firstName lastName avatar');
 };
 
-// Get job by ID
 exports.getJobById = async (jobId) => {
-  const job = await JobOffer.findById(jobId).populate('companyId');
-  if (!job) throw new Error('Job not found');
-  return job;
+  return await JobOffer.findById(jobId).populate('companyId', 'firstName lastName email bio');
 };
 
-// Close job
-exports.closeJob = async (jobId, companyId) => {
-  const job = await JobOffer.findOneAndUpdate(
-    { _id: jobId, companyId },
-    { isActive: false },
-    { new: true }
-  );
-
-  if (!job) throw new Error('Unauthorized or job not found');
-  return job;
-};
-
-// Apply to job
 exports.applyToJob = async (jobId, userId, applicationData) => {
   const job = await JobOffer.findById(jobId);
-  if (!job) throw new Error('Job not found');
+  if (!job || !job.isActive) throw new Error('Job not found or closed');
 
-  if (!job.isActive) {
-    throw new Error('Job offer is closed');
-  }
-
-  const alreadyApplied = job.applicants.some(
-    (a) => a.userId.toString() === userId
-  );
-
-  if (alreadyApplied) {
-    throw new Error('You already applied to this job');
-  }
+  const alreadyApplied = job.applicants.some(a => a.userId.toString() === userId);
+  if (alreadyApplied) throw new Error('Already applied');
 
   job.applicants.push({
     userId,
@@ -56,28 +30,21 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
   });
 
   await job.save();
+
+  // PROJET REQUIREMENT: Open a discussion
+  await Message.create({
+    sender: userId,
+    receiver: job.companyId,
+    content: `Hello, I've just applied for the "${job.title}" position. I'm looking forward to your feedback!`
+  });
+
   return job;
 };
 
-// Update applicant status
-exports.updateApplicantStatus = async (
-  jobId,
-  applicantId,
-  status,
-  score
-) => {
-  const job = await JobOffer.findById(jobId);
-  if (!job) throw new Error('Job not found');
-
-  const applicant = job.applicants.find(
-    (a) => a.userId.toString() === applicantId
+exports.updateApplicantStatus = async (jobId, applicantId, status) => {
+  return await JobOffer.findOneAndUpdate(
+    { _id: jobId, "applicants.userId": applicantId },
+    { $set: { "applicants.$.status": status } },
+    { new: true }
   );
-
-  if (!applicant) throw new Error('Applicant not found');
-
-  applicant.status = status;
-  if (score !== undefined) applicant.score = score;
-
-  await job.save();
-  return job;
 };
