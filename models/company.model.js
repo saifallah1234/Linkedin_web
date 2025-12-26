@@ -20,18 +20,25 @@ const companySchema = new mongoose.Schema({
   password: { 
     type: String, 
     required: true, 
-    select: false // Hides password by default when querying
+    select: false 
   },
   description: { 
     type: String, 
     maxlength: 1000 
   },
-  website: {type: String},
+  website: { type: String },
   logo: { 
     type: String, 
-    default: '' // URL to the logo image
+    default: '' 
   },
+  
+  // --- NEW FIELD: Followers List ---
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+
   createdAt: { type: Date, default: Date.now }
-}); // Adds createdAt and updatedAt automatically
+});
 
 module.exports = mongoose.model('Company', companySchema);
