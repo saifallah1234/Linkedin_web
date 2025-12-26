@@ -63,13 +63,18 @@ const jobOfferSchema = new mongoose.Schema({
   startDate: { type: Date },
   deadline: { type: Date },
 
+  //Instead of deleting a job offer, you close it.
+  isActive: { 
+    type: Boolean, 
+    default: true 
+  },
   applicants: [applicantSchema],
 
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
-});
+  // createdAt: { 
+  //   type: Date, 
+  //   default: Date.now 
+  // }
+},{ timestamps: true });//a Mongoose option that automatically addscreatedAt et updatedAt
 
 jobOfferSchema.index({ location: 1, type: 1 });
 
