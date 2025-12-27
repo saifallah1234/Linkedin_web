@@ -92,63 +92,148 @@ class PostService {
 
   // Get user's feed (connections + followed companies)
   static async getUserFeed(userId, page = 1, limit = 10) {
+  try {
     const skip = (page - 1) * limit;
+    
+    console.log('DEBUG - Getting feed for user:', userId);
 
-    // Get user's connections
+    // Get user's ACCEPTED connections
     const connections = await Connection.find({
+      status: 'ACCEPTED',
       $or: [
-        { requester: userId, status: 'accepted' },
-        { recipient: userId, status: 'accepted' }
+        { requesterId: userId },
+        { receiverId: userId }
       ]
     });
 
-    const connectedUserIds = connections.map(conn => 
-      conn.requester.equals(userId) ? conn.recipient : conn.requester
-    );
+    console.log('DEBUG - Found connections:', connections.length);
 
-    // Get followed companies
-    const user = await User.findById(userId);
-    const followedCompanies = user.followedCompanies || [];
+    // Extract connected user IDs
+    const connectedUserIds = connections.map(conn => {
+      const requesterIdStr = conn.requesterId.toString();
+      const receiverIdStr = conn.receiverId.toString();
+      const userIdStr = userId.toString();
+      
+      if (requesterIdStr === userIdStr) {
+        return conn.receiverId;
+      } else {
+        return conn.requesterId;
+      }
+    });
 
-    // Build query for posts from connections and followed companies
-    const posts = await Post.find({
-      $or: [
-        { 'author.id': { $in: connectedUserIds }, 'author.type': 'User' },
-        { 'author.id': { $in: followedCompanies }, 'author.type': 'Company' }
-      ]
-    })
+    console.log('DEBUG - Connected user IDs:', connectedUserIds.map(id => id.toString()));
+
+    // Get user WITH followingCompanies (array of objects)
+    const user = await User.findById(userId).select('followingCompanies');
+    
+    // Extract just the company IDs from the followingCompanies array
+    const followedCompanyIds = user?.followingCompanies?.map(item => item.companyId) || [];
+    
+    console.log('DEBUG - Following companies:', user?.followingCompanies);
+    console.log('DEBUG - Followed company IDs:', followedCompanyIds.map(id => id.toString()));
+
+    // Include the user's own ID to see their own posts in the feed
+    const allAuthorIds = [
+      userId,
+      ...connectedUserIds
+    ];
+
+    console.log('DEBUG - All author IDs to fetch:', allAuthorIds.map(id => id.toString()));
+
+    // Build query - handle empty arrays properly
+    const queryConditions = [
+      { 'author.id': userId, 'author.type': 'User' } // Always include own posts
+    ];
+
+    // Add connected users condition if there are any
+    if (connectedUserIds.length > 0) {
+      queryConditions.push({ 
+        'author.id': { $in: connectedUserIds }, 
+        'author.type': 'User' 
+      });
+    }
+
+    // Add followed companies condition if there are any
+    // NOTE: Now using followedCompanyIds instead of followedCompanies
+    if (followedCompanyIds.length > 0) {
+      queryConditions.push({ 
+        'author.id': { $in: followedCompanyIds }, 
+        'author.type': 'Company' 
+      });
+    }
+
+    const postsQuery = queryConditions.length > 0 ? { $or: queryConditions } : {};
+
+    console.log('DEBUG - Posts query:', JSON.stringify(postsQuery, null, 2));
+
+    // If no query conditions (no connections, no followed companies), return empty
+    if (Object.keys(postsQuery).length === 0) {
+      return {
+        posts: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          pages: 0
+        }
+      };
+    }
+
+    // Fetch posts
+    const posts = await Post.find(postsQuery)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
+
+    console.log('DEBUG - Found posts:', posts.length);
 
     // Get total count for pagination
-    const total = await Post.countDocuments({
-      $or: [
-        { 'author.id': { $in: connectedUserIds }, 'author.type': 'User' },
-        { 'author.id': { $in: followedCompanies }, 'author.type': 'Company' }
-      ]
-    });
+    const total = await Post.countDocuments(postsQuery);
 
     // Populate author details and reactions for each post
     const postsWithReactions = await Promise.all(
       posts.map(async (post) => {
-        let authorData = null;
-        if (post.author.type === 'User') {
-          authorData = await User.findById(post.author.id).select('firstName lastName avatar logo');
-        } else if (post.author.type === 'Company') {
-          authorData = await Company.findById(post.author.id).select('name avatar logo');
+        try {
+          let authorData = null;
+          
+          // Populate author based on type
+          if (post.author.type === 'User') {
+            authorData = await User.findById(post.author.id)
+              .select('firstName lastName image avatar logo')
+              .lean();
+          } else if (post.author.type === 'Company') {
+            authorData = await Company.findById(post.author.id)
+              .select('name image avatar logo')
+              .lean();
+          }
+          
+          // Get user's reaction to this post
+          const userReaction = await Reaction.findOne({
+            'target.id': post._id,
+            'target.type': 'Post',
+            userId: userId
+          }).lean();
+          
+          return {
+            ...post,
+            author: {
+              ...post.author,
+              details: authorData
+            },
+            userReaction: userReaction || null
+          };
+        } catch (error) {
+          console.error('Error processing post:', post._id, error);
+          return {
+            ...post,
+            author: {
+              ...post.author,
+              details: null
+            },
+            userReaction: null
+          };
         }
-        
-        const userReaction = await Reaction.findOne({
-          'target.id': post._id,
-          'target.type': 'Post',
-          userId: userId
-        });
-        
-        const postObj = post.toObject();
-        postObj.author.details = authorData;
-        postObj.userReaction = userReaction || null;
-        return postObj;
       })
     );
 
@@ -161,7 +246,11 @@ class PostService {
         pages: Math.ceil(total / limit)
       }
     };
+  } catch (error) {
+    console.error('Error in getUserFeed:', error);
+    throw error;
   }
+}
 
   // Get posts by author
   static async getPostsByAuthor(authorId, authorType, page = 1, limit = 10) {

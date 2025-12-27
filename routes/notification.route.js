@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const notificationCtrl = require('../controllers/notification.controller');
-const auth = require('../middleware/mockAuth'); // Replace with real auth later
+const { authenticate } = require('../middleware/auth');
 
 /**
  * @swagger
@@ -11,7 +11,7 @@ const auth = require('../middleware/mockAuth'); // Replace with real auth later
  */
 
 // Protect all notification routes
-router.use(auth);
+router.use(authenticate);
 
 /**
  * @swagger

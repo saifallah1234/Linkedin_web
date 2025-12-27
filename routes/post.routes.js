@@ -17,14 +17,6 @@ const validate = (req, res, next) => {
   }
   next();
 };
-
-/**
- * @swagger
- * tags:
- *   name: Posts
- *   description: Post management endpoints
- */
-
 /**
  * @swagger
  * /api/posts:
@@ -46,11 +38,17 @@ const validate = (req, res, next) => {
  *             properties:
  *               content:
  *                 type: string
+ *                 description: The text content of the post
  *               media:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *                 description: Optional media files to attach
+ *               useAI:
+ *                 type: boolean
+ *                 description: Whether to enhance content using AI
+ *                 default: false
  *     responses:
  *       201:
  *         description: Post created successfully
@@ -59,6 +57,7 @@ const validate = (req, res, next) => {
  *       401:
  *         description: Unauthorized
  */
+
 router.post(
   '/',
   authenticate,
@@ -68,11 +67,13 @@ router.post(
       .notEmpty()
       .withMessage('Content is required')
       .isLength({ max: 5000 })
-      .withMessage('Content too long (max 5000 chars)')
+      .withMessage('Content too long (max 5000 chars)'),
+    body('useAI').optional().isBoolean().withMessage('useAI must be boolean')
   ],
   validate,
   PostController.createPost
 );
+
 
 /**
  * @swagger
@@ -199,6 +200,10 @@ router.get(
  *             properties:
  *               content:
  *                 type: string
+ *               useAI:
+ *                 type: boolean
+ *                 description: Whether to enhance content using AI
+ *                 default: false
  *     responses:
  *       200:
  *         description: Post updated successfully
@@ -216,7 +221,8 @@ router.put(
     body('content')
       .optional()
       .isLength({ max: 5000 })
-      .withMessage('Content too long (max 5000 chars)')
+      .withMessage('Content too long (max 5000 chars)'),
+    body('useAI').optional().isBoolean().withMessage('useAI must be boolean')
   ],
   validate,
   PostController.updatePost
@@ -365,6 +371,10 @@ router.get(
  *               parentCommentId:
  *                 type: string
  *                 description: ID of parent comment for nested replies
+ *               useAI:
+ *                 type: boolean
+ *                 description: Whether to enhance content using AI
+ *                 default: false
  *     responses:
  *       201:
  *         description: Comment added successfully
@@ -385,7 +395,8 @@ router.post(
       .withMessage('Content is required')
       .isLength({ max: 2000 })
       .withMessage('Content too long (max 2000 chars)'),
-    body('parentCommentId').optional().isMongoId()
+    body('parentCommentId').optional().isMongoId().withMessage('Invalid parent comment ID'),
+    body('useAI').optional().isBoolean().withMessage('useAI must be boolean')
   ],
   validate,
   CommentController.createComment
@@ -455,6 +466,10 @@ router.get(
  *             properties:
  *               content:
  *                 type: string
+ *               useAI:
+ *                 type: boolean
+ *                 description: Whether to enhance content using AI
+ *                 default: false
  *     responses:
  *       200:
  *         description: Comment updated successfully
@@ -472,7 +487,8 @@ router.put(
       .notEmpty()
       .withMessage('Content is required')
       .isLength({ max: 2000 })
-      .withMessage('Content too long (max 2000 chars)')
+      .withMessage('Content too long (max 2000 chars)'),
+    body('useAI').optional().isBoolean().withMessage('useAI must be boolean')
   ],
   validate,
   CommentController.updateComment

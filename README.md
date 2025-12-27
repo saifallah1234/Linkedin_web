@@ -198,3 +198,4 @@ Notes: adapt to the real schema for exact fields and constraints.
 npm install express
 npm install morgan mongoose bcryptjs jsonwebtoken express-validator
 npm install swagger-ui-express swagger-jsdoc
+npm install groq-sdk

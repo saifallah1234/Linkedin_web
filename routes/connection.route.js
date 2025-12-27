@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const connectionController = require('../controllers/connection.controller');
-const protect = require('../middleware/mockAuth'); // Switch to real 'auth' later
+const { authenticate } = require('../middleware/auth');
 
 /**
  * @swagger
@@ -33,7 +33,7 @@ const protect = require('../middleware/mockAuth'); // Switch to real 'auth' late
  *       401:
  *         description: Unauthorized
  */
-router.post('/request/:userId', protect, connectionController.sendConnectionRequest);
+router.post('/request/:userId', authenticate, connectionController.sendConnectionRequest);
 
 /**
  * @swagger
@@ -71,7 +71,7 @@ router.post('/request/:userId', protect, connectionController.sendConnectionRequ
  *       401:
  *         description: Unauthorized
  */
-router.put('/respond/:connectionId', protect, connectionController.respondToRequest);
+router.put('/respond/:connectionId', authenticate, connectionController.respondToRequest);
 
 /**
  * @swagger
@@ -87,7 +87,7 @@ router.put('/respond/:connectionId', protect, connectionController.respondToRequ
  *       401:
  *         description: Unauthorized
  */
-router.get('/pending', protect, connectionController.getPendingRequests);
+router.get('/pending', authenticate, connectionController.getPendingRequests);
 
 /**
  * @swagger
@@ -103,6 +103,6 @@ router.get('/pending', protect, connectionController.getPendingRequests);
  *       401:
  *         description: Unauthorized
  */
-router.get('/', protect, connectionController.getMyConnections);
+router.get('/', authenticate, connectionController.getMyConnections);
 
 module.exports = router;

@@ -1,33 +1,41 @@
 const CommentService = require('../services/comment.service');
+const { generatePostContent } = require('../utils/groq');
 
 class CommentController {
   // Create a comment
   static async createComment(req, res) {
-    try {
-      const { postId } = req.params;
-      const { content, parentCommentId } = req.body;
+  try {
+    const { postId } = req.params;
+    let { content, parentCommentId } = req.body;
+    const rawUseAI = req.body.useAI;
+    const useAI = rawUseAI === true || rawUseAI === 'true' || rawUseAI === '1' || rawUseAI === 1;
 
-      const comment = await CommentService.createComment(
-        postId,
-        req.user.id,
-        req.user.type,
-        content,
-        parentCommentId
-      );
-
-      res.status(201).json({
-        success: true,
-        message: 'Comment added successfully',
-        data: comment
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Error creating comment',
-        error: error.message
-      });
+    if (useAI) {
+      content = await generatePostContent(content);
     }
+
+    const comment = await CommentService.createComment(
+      postId,
+      req.user.id,
+      req.user.type,
+      content,
+      parentCommentId
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Comment added successfully',
+      data: comment
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error creating comment',
+      error: error.message
+    });
   }
+}
+
 
   // Get comments for a post
   static async getPostComments(req, res) {
@@ -57,38 +65,45 @@ class CommentController {
   }
 
   // Update comment
-  static async updateComment(req, res) {
-    try {
-      const { commentId } = req.params;
-      const { content } = req.body;
+ static async updateComment(req, res) {
+  try {
+    const { commentId } = req.params;
+    let { content } = req.body;
+    const rawUseAI = req.body.useAI;
+    const useAI = rawUseAI === true || rawUseAI === 'true' || rawUseAI === '1' || rawUseAI === 1;
 
-      const comment = await CommentService.updateComment(
-        commentId,
-        req.user.id,
-        req.user.type,
-        content
-      );
+    if (content !== undefined && useAI) {
+      content = await generatePostContent(content);
+    }
 
-      if (!comment) {
-        return res.status(404).json({
-          success: false,
-          message: 'Comment not found or not authorized'
-        });
-      }
+    const comment = await CommentService.updateComment(
+      commentId,
+      req.user.id,
+      req.user.type,
+      content
+    );
 
-      res.json({
-        success: true,
-        message: 'Comment updated successfully',
-        data: comment
-      });
-    } catch (error) {
-      res.status(500).json({
+    if (!comment) {
+      return res.status(404).json({
         success: false,
-        message: 'Error updating comment',
-        error: error.message
+        message: 'Comment not found or not authorized'
       });
     }
+
+    res.json({
+      success: true,
+      message: 'Comment updated successfully',
+      data: comment
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating comment',
+      error: error.message
+    });
   }
+}
+
 
   // Delete comment
   static async deleteComment(req, res) {

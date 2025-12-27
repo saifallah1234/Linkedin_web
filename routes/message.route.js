@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const messageCtrl = require('../controllers/message.controller');
-const auth = require('../middleware/mockAuth'); // Use real auth later
+const { authenticate } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 /**
@@ -12,7 +12,7 @@ const upload = require('../middleware/upload');
  */
 
 // Protect all messaging routes
-router.use(auth);
+router.use(authenticate);
 
 /**
  * @swagger
