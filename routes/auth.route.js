@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const authController = require('../controllers/auth.controller');
-const upload = require('../middleware/upload'); // <--- Import Middleware
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -13,11 +13,57 @@ const validate = (req, res, next) => {
   next();
 };
 
-// --- USER SIGNUP ---
-// Expecting a file field named 'image'
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication endpoints (user & company)
+ */
+
+/**
+ * @swagger
+ * /signup/user:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     consumes:
+ *       - multipart/form-data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - password
+ *               - location
+ *               - image
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Validation errors
+ */
 router.post(
   '/signup/user',
-  upload.single('image'), // <--- Multer processes file FIRST
+  upload.single('image'),
   [
     body('firstName').notEmpty().withMessage('First name is required'),
     body('lastName').notEmpty().withMessage('Last name is required'),
@@ -29,8 +75,43 @@ router.post(
   authController.signupUser
 );
 
-// --- COMPANY SIGNUP ---
-// Expecting a file field named 'logo'
+/**
+ * @swagger
+ * /signup/company:
+ *   post:
+ *     summary: Register a new company
+ *     tags: [Auth]
+ *     consumes:
+ *       - multipart/form-data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *               - logo
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               logo:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Company created successfully
+ *       400:
+ *         description: Validation errors
+ */
 router.post(
   '/signup/company',
   upload.single('logo'),
@@ -43,7 +124,33 @@ router.post(
   validate,
   authController.signupCompany
 );
-// --- USER LOGIN ---
+
+/**
+ * @swagger
+ * /login/user:
+ *   post:
+ *     summary: Login as a user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid credentials
+ */
 router.post(
   '/login/user',
   [
@@ -54,7 +161,32 @@ router.post(
   authController.loginUser
 );
 
-// --- COMPANY LOGIN ---
+/**
+ * @swagger
+ * /login/company:
+ *   post:
+ *     summary: Login as a company
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid credentials
+ */
 router.post(
   '/login/company',
   [

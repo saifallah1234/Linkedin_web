@@ -1,15 +1,57 @@
 const express = require('express');
 const router = express.Router();
 const notificationCtrl = require('../controllers/notification.controller');
-// const auth = require('../middlewares/auth.middleware'); // or your mockAuth
-const auth = require('../middleware/mockAuth'); // or your mockAuth
+const auth = require('../middleware/mockAuth'); // Replace with real auth later
 
-router.use(auth); // All notification routes require login
+/**
+ * @swagger
+ * tags:
+ *   name: Notifications
+ *   description: Notification endpoints
+ */
 
-// GET /api/notifications
+// Protect all notification routes
+router.use(auth);
+
+/**
+ * @swagger
+ * /api/notifications:
+ *   get:
+ *     summary: Get all notifications for the logged-in user
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of notifications retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/', notificationCtrl.getNotifications);
 
-// PUT /api/notifications/:id/read
+/**
+ * @swagger
+ * /api/notifications/{id}/read:
+ *   put:
+ *     summary: Mark a notification as read
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the notification to mark as read
+ *     responses:
+ *       200:
+ *         description: Notification marked as read
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Notification not found
+ */
 router.put('/:id/read', notificationCtrl.readNotification);
 
 module.exports = router;

@@ -4,8 +4,72 @@ const companyController = require('../controllers/company.controller');
 const protect = require('../middleware/mockAuth'); // Switch to '../middleware/auth' later
 const upload = require('../middleware/upload'); // <--- Import Middleware
 
-// --- GET /api/companies/:id ---
+/**
+ * @swagger
+ * tags:
+ *   name: Company
+ *   description: Company endpoints
+ */
+
+/**
+ * @swagger
+ * /company:
+ *   get:
+ *     summary: Get company profile
+ *     tags: [Company]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Company profile retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/', protect, companyController.getCompanyProfile);
+
+/**
+ * @swagger
+ * /company/edit/{id}:
+ *   put:
+ *     summary: Update company profile
+ *     tags: [Company]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Company ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               website:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               logo:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Company updated successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ */
 router.put(
   '/edit/:id', 
   protect,                // 1. Check Token
