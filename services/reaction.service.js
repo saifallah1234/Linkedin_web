@@ -2,6 +2,7 @@ const Reaction = require('../models/reaction.model');
 const Post = require('../models/post.model');
 const Comment = require('../models/comment.model');
 const mongoose = require('mongoose');
+const notificationService = require('./notification.service');
 
 class ReactionService {
   // Add or update reaction
@@ -51,6 +52,28 @@ class ReactionService {
       });
 
       await reaction.save();
+      try {
+        // Notify the target author
+        let targetAuthor = null;
+        if (targetType === 'Post') {
+          const p = await Post.findById(targetId).select('author');
+          targetAuthor = p && p.author ? p.author : null;
+        } else if (targetType === 'Comment') {
+          const c = await Comment.findById(targetId).select('author');
+          targetAuthor = c && c.author ? c.author : null;
+        }
+
+        if (targetAuthor && targetAuthor.id.toString() !== userId.toString()) {
+          await notificationService.createNotification(
+            { id: targetAuthor.id, type: targetAuthor.type },
+            { id: userId, type: 'User' },
+            'reaction',
+            { id: targetId, type: modelType }
+          );
+        }
+      } catch (err) {
+        console.error('Error creating reaction notification:', err);
+      }
       return reaction;
     }
   }

@@ -7,12 +7,12 @@ const notificationSchema = new mongoose.Schema({
     id: { 
       type: mongoose.Schema.Types.ObjectId, 
       required: true, 
-      refPath: 'receiver.type' // Dynamic Reference
+      refPath: 'receiver.type'
     },
     type: { 
       type: String, 
       required: true, 
-      enum: ['User', 'Company'] // Must match your Model names
+      enum: ['User', 'Company']
     }
   },
 
@@ -34,7 +34,18 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['new_post', 'reaction', 'comment', 'reply', 'job_offer']
+    enum: [
+      'new_post',
+      'reaction',
+      'comment',
+      'reply',
+      'job_offer',
+      'connection_request',
+      'connection_accepted',
+      'job_application',
+      'company_post',
+      'MESSAGE' // ← ADD THIS
+    ]
   },
   
   // --- 4. RELATED ENTITY (What is this about?) ---
@@ -46,10 +57,16 @@ const notificationSchema = new mongoose.Schema({
     },
     type: { 
       type: String, 
-      required: true, 
-      // Note: These must match your actual Mongoose Model names to work with populate()
-      // If your model is 'JobOffer', this string must be 'JobOffer'
-      enum: ['Post', 'Comment', 'JobOffer'] 
+      required: true,
+      enum: [
+        'Post',
+        'Reaction',
+        'Comment',
+        'JobOffer',
+        'Connection',
+        'JobApplication',
+        'Message' // ← ADD THIS (capital M to match your Message model)
+      ]
     }
   },
 

@@ -2,6 +2,7 @@ const Connection = require('../models/Connection.model');
 const User = require('../models/User.model');
 const mongoose = require('mongoose');
 const toStr = v => (v && v.toString ? v.toString() : v);
+const notificationService = require('../services/notification.service');
 
 
 exports.sendConnectionRequest = async (req, res) => {
@@ -53,6 +54,18 @@ exports.sendConnectionRequest = async (req, res) => {
       status: 'PENDING'
     });
 
+    // Send notification to receiver
+    try {
+      await notificationService.createNotification(
+        { id: receiverId, type: 'User' },
+        { id: requesterId, type: req.user.type || 'User' },
+        'connection_request',
+        { id: newConnection._id, type: 'Post' }
+      );
+    } catch (err) {
+      console.error('Error creating connection notification:', err);
+    }
+
     res.status(201).json({ message: "Connection request sent", connection: newConnection });
 
   } catch (error) {
@@ -94,6 +107,20 @@ exports.respondToRequest = async (req, res) => {
     connection.status = action;
     connection.respondedAt = new Date();
     await connection.save();
+
+    // Notify requester if accepted
+    try {
+      if (action === 'ACCEPTED') {
+        await notificationService.createNotification(
+          { id: connection.requesterId, type: 'User' },
+          { id: connection.receiverId, type: 'User' },
+          'connection_accepted',
+          { id: connection._id, type: 'Post' }
+        );
+      }
+    } catch (err) {
+      console.error('Error creating connection accepted notification:', err);
+    }
 
     res.json({ message: `Connection request ${action.toLowerCase()}.`, connection });
 
@@ -201,5 +228,31 @@ exports.getMyConnections = async (req, res) => {
   } catch (error) {
     console.error('getMyConnections error:', error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+// --- Disconnect / Unfriend ---
+exports.disconnect = async (req, res) => {
+  try {
+    const currentUserId = req.user.id.toString();
+    const otherUserId = req.params.userId;
+
+    // Find an ACCEPTED connection in either direction
+    const conn = await Connection.findOneAndDelete({
+      status: 'ACCEPTED',
+      $or: [
+        { requesterId: currentUserId, receiverId: otherUserId },
+        { requesterId: otherUserId, receiverId: currentUserId }
+      ]
+    });
+
+    if (!conn) {
+      return res.status(404).json({ message: 'No accepted connection found between these users.' });
+    }
+
+    return res.json({ message: 'Disconnected successfully', connection: conn });
+  } catch (err) {
+    console.error('disconnect error:', err);
+    return res.status(500).json({ message: err.message });
   }
 };

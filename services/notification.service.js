@@ -22,11 +22,23 @@ exports.createNotification = async (receiver, sender, type, entity) => {
   }
 };
 
-exports.getUserNotifications = async (userId) => {
+exports.getUserNotifications = async (userId, page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
   return await Notification.find({ 'receiver.id': userId })
     .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
     .populate('sender.id') // Dynamically populates based on sender.type
     .populate('entity.id'); // Dynamically populates based on entity.type
+};
+
+exports.getUnreadCount = async (userId) => {
+  return await Notification.countDocuments({ 'receiver.id': userId, isRead: false });
+};
+
+exports.markAllAsRead = async (userId) => {
+  const res = await Notification.updateMany({ 'receiver.id': userId, isRead: false }, { isRead: true });
+  return res.nModified || res.modifiedCount || 0;
 };
 
 exports.markAsRead = async (notificationId, userId) => {

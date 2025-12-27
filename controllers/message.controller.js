@@ -2,10 +2,26 @@ const messageService = require('../services/message.service');
 
 exports.send = async (req, res) => {
     try {
+        console.log('=== CONTROLLER ===');
+        console.log('req.user.id:', req.user.id);
+        console.log('req.body.receiverId:', req.body.receiverId);
+        console.log('req.body.content:', req.body.content);
+        console.log('req.body.attachments:', req.body.attachments);
+        
         const { receiverId, content, attachments } = req.body;
-        const msg = await messageService.sendMessage(req.user.id, receiverId, content, attachments);
+        
+        // receiverId should already be converted to ObjectId by middleware
+        const msg = await messageService.sendMessage(
+          req.user.id, 
+          receiverId, 
+          content, 
+          attachments || []
+        );
+        
+        console.log('Message created:', msg._id);
         res.status(201).json(msg);
     } catch (err) {
+        console.log('Controller error:', err.message);
         res.status(400).json({ message: err.message });
     }
 };

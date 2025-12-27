@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, isUser } = require('../middleware/auth');
 const upload = require('../middleware/upload'); // For image upload
 
 /**
@@ -26,7 +26,7 @@ const upload = require('../middleware/upload'); // For image upload
  *       401:
  *         description: Unauthorized
  */
-router.get('/', authenticate, userController.getUserProfile);
+router.get('/', authenticate, isUser, userController.getUserProfile);
 
 // Get list of companies the user is following
 /**
@@ -43,7 +43,7 @@ router.get('/', authenticate, userController.getUserProfile);
  *       401:
  *         description: Unauthorized
  */
-router.get('/following', authenticate, userController.getFollowingList);
+router.get('/following', authenticate, isUser, userController.getFollowingList);
 
 // Update user profile
 /**
@@ -92,7 +92,7 @@ router.get('/following', authenticate, userController.getFollowingList);
  */
 router.put(
   '/edit/:id', 
-  authenticate,              
+  authenticate, isUser,              
   upload.single('image'), 
   userController.updateUser
 );
@@ -119,7 +119,7 @@ router.put(
  *       401:
  *         description: Unauthorized
  */
-router.post('/follow/:id', authenticate, userController.followCompany);
+router.post('/follow/:id', authenticate, isUser, userController.followCompany);
 
 // Unfollow a company
 /**
@@ -143,6 +143,6 @@ router.post('/follow/:id', authenticate, userController.followCompany);
  *       401:
  *         description: Unauthorized
  */
-router.post('/unfollow/:id', authenticate, userController.unfollowCompany);
+router.post('/unfollow/:id', authenticate, isUser, userController.unfollowCompany);
 
 module.exports = router;

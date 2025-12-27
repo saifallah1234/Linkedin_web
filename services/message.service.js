@@ -10,13 +10,27 @@ exports.sendMessage = async (senderId, receiverId, content, attachments = []) =>
         attachments
     });
 
-    // Create a notification for the receiver
-    await Notification.create({
-        recipient: receiverId,
-        sender: senderId,
-        type: 'MESSAGE',
-        isRead: false
-    });
+    // Create a notification for the receiver - FIXED PARAMETERS
+    try {
+        await Notification.create({
+            receiver: {
+                id: receiverId,
+                type: 'User' // Assuming both sender and receiver are Users for messages
+            },
+            sender: {
+                id: senderId,
+                type: 'User'
+            },
+            type: 'MESSAGE', // This should be in your Notification model enum
+            entity: {
+                id: message._id, // The message itself
+                type: 'Message' // This should match your Message model name
+            }
+        });
+    } catch (error) {
+        console.error("Failed to create notification:", error);
+        // Don't fail the message if notification fails
+    }
 
     return message;
 };

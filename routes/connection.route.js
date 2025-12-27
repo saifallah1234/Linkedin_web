@@ -105,4 +105,7 @@ router.get('/pending', authenticate, connectionController.getPendingRequests);
  */
 router.get('/', authenticate, connectionController.getMyConnections);
 
+// Disconnect / unfriend a user
+router.delete('/disconnect/:userId', authenticate, connectionController.disconnect);
+
 module.exports = router;

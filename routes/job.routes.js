@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jobCtrl = require('../controllers/job.controller');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, isCompany, isUser } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 /**
@@ -80,7 +80,7 @@ router.get('/:id', jobCtrl.getJobById);
  *       401:
  *         description: Unauthorized
  */
-router.post('/:id/apply', authenticate, upload.fields([
+router.post('/:id/apply', authenticate, isUser, upload.fields([
   { name: 'resume', maxCount: 1 },
   { name: 'additionalAttachment', maxCount: 1 }
 ]), jobCtrl.applyToJob);
@@ -120,7 +120,7 @@ router.post('/:id/apply', authenticate, upload.fields([
  *       401:
  *         description: Unauthorized
  */
-router.post('/', authenticate, jobCtrl.createJob);
+router.post('/', authenticate, isCompany, jobCtrl.createJob);
 
 /**
  * @swagger
@@ -143,7 +143,7 @@ router.post('/', authenticate, jobCtrl.createJob);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id/close', authenticate, jobCtrl.closeJob);
+router.put('/:id/close', authenticate, isCompany, jobCtrl.closeJob);
 
 /**
  * @swagger
@@ -186,6 +186,6 @@ router.put('/:id/close', authenticate, jobCtrl.closeJob);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id/applicants/:userId/status', authenticate, jobCtrl.updateApplicantStatus);
+router.put('/:id/applicants/:userId/status', authenticate, isCompany, jobCtrl.updateApplicantStatus);
 
 module.exports = router;

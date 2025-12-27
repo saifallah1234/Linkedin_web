@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const companyController = require('../controllers/company.controller');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, isCompany } = require('../middleware/auth');
 const upload = require('../middleware/upload'); // <--- Import Middleware
 
 /**
@@ -25,7 +25,7 @@ const upload = require('../middleware/upload'); // <--- Import Middleware
  *       401:
  *         description: Unauthorized
  */
-router.get('/', authenticate, companyController.getCompanyProfile);
+router.get('/', authenticate, isCompany, companyController.getCompanyProfile);
 
 /**
  * @swagger
@@ -72,7 +72,7 @@ router.get('/', authenticate, companyController.getCompanyProfile);
  */
 router.put(
   '/edit/:id', 
-  authenticate,           // 1. Check Token
+  authenticate, isCompany,           // 1. Check Token + company role
   upload.single('logo'),  // 2. Handle Logo Upload (Form field name must be 'logo')
   companyController.updateCompany // 3. Logic
 );

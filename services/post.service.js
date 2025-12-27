@@ -4,6 +4,7 @@ const Comment = require('../models/comment.model');
 const Connection = require('../models/Connection.model');
 const User = require('../models/User.model');
 const Company = require('../models/Company.model');
+const notificationService = require('./notification.service');
 
 class PostService {
   // Create a new post
@@ -20,7 +21,43 @@ class PostService {
       }))
     });
     
-    return await post.save();
+    const saved = await post.save();
+
+    // Notify relevant users
+    try {
+      if (authorType === 'User') {
+        // Notify accepted connections
+        const connections = await Connection.find({
+          status: 'ACCEPTED',
+          $or: [ { requesterId: authorId }, { receiverId: authorId } ]
+        });
+
+        for (const conn of connections) {
+          const otherId = conn.requesterId.toString() === authorId.toString() ? conn.receiverId : conn.requesterId;
+          await notificationService.createNotification(
+            { id: otherId, type: 'User' },
+            { id: authorId, type: 'User' },
+            'new_post',
+            { id: saved._id, type: 'Post' }
+          );
+        }
+      } else if (authorType === 'Company') {
+        // Notify followers (users who have this company in followingCompanies)
+        const followers = await User.find({ 'followingCompanies.companyId': authorId }).select('_id');
+        for (const f of followers) {
+          await notificationService.createNotification(
+            { id: f._id, type: 'User' },
+            { id: authorId, type: 'Company' },
+            'company_post',
+            { id: saved._id, type: 'Post' }
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Error creating post notifications:', err);
+    }
+
+    return saved;
   }
 
   // Get post by ID with author details

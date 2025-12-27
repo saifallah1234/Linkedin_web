@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const messageCtrl = require('../controllers/message.controller');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, isUser } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const mongoose = require('mongoose');
 
 /**
  * @swagger
@@ -11,8 +12,11 @@ const upload = require('../middleware/upload');
  *   description: Messaging endpoints
  */
 
-// Protect all messaging routes
-router.use(authenticate);
+// Protect all messaging routes (users only)
+router.use(authenticate, isUser);
+
+// Add this middleware to parse multipart form data
+router.use(express.urlencoded({ extended: true }));
 
 /**
  * @swagger
@@ -67,8 +71,11 @@ router.get('/:userId', messageCtrl.getHistory);
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - receiverId
+ *               - content
  *             properties:
- *               recipientId:
+ *               receiverId:
  *                 type: string
  *                 description: ID of the recipient user
  *               content:
@@ -92,6 +99,38 @@ router.post(
   '/',
   upload.array('files', 5),
   (req, res, next) => {
+    console.log('=== MESSAGE ROUTE MIDDLEWARE ===');
+    console.log('Form data keys:', Object.keys(req.body));
+    console.log('Form data values:', req.body);
+    console.log('Files:', req.files);
+    
+    // Validate that receiverId is present (not recipientId)
+    if (!req.body.receiverId) {
+      console.log('ERROR: receiverId is missing');
+      return res.status(400).json({ 
+        message: "receiverId is required" 
+      });
+    }
+    
+    if (!req.body.content) {
+      console.log('ERROR: content is missing');
+      return res.status(400).json({ 
+        message: "content is required" 
+      });
+    }
+    
+    // Convert receiverId to ObjectId if it's a valid string
+    try {
+      // This ensures the ID is in the correct format for MongoDB
+      req.body.receiverId = new mongoose.Types.ObjectId(req.body.receiverId);
+    } catch (error) {
+      console.log('ERROR: Invalid receiverId format');
+      return res.status(400).json({ 
+        message: "Invalid receiverId format. Must be a valid MongoDB ObjectId" 
+      });
+    }
+    
+    // Process attachments
     if (req.files) {
       req.body.attachments = req.files.map(file => ({
         url: file.path,
@@ -99,9 +138,12 @@ router.post(
           ? 'image'
           : file.mimetype.startsWith('video/')
           ? 'video'
-          : 'file'
+          : 'file',
+        originalName: file.originalname
       }));
     }
+    
+    console.log('=== END MIDDLEWARE ===');
     next();
   },
   messageCtrl.send

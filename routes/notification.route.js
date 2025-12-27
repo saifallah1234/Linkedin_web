@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const notificationCtrl = require('../controllers/notification.controller');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, isUser } = require('../middleware/auth');
 
 /**
  * @swagger
@@ -10,8 +10,14 @@ const { authenticate } = require('../middleware/auth');
  *   description: Notification endpoints
  */
 
-// Protect all notification routes
-router.use(authenticate);
+// Protect all notification routes (users only for now)
+router.use(authenticate, isUser);
+
+// Get unread count
+router.get('/unread/count', notificationCtrl.getUnreadCount);
+
+// Mark all as read
+router.put('/read-all', notificationCtrl.markAllAsRead);
 
 /**
  * @swagger

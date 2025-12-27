@@ -3,6 +3,7 @@ const Post = require('../models/post.model');
 const Reaction = require('../models/reaction.model');
 const User = require('../models/User.model');
 const Company = require('../models/Company.model');
+const notificationService = require('./notification.service');
 
 class CommentService {
   // Create a comment
@@ -25,6 +26,40 @@ class CommentService {
     // If it's a reply, increment replies count on parent comment
     if (parentCommentId) {
       await Comment.findByIdAndUpdate(parentCommentId, { $inc: { repliesCount: 1 } });
+    }
+
+    // Notifications:
+    try {
+      // Notify post author when someone comments (top-level comment)
+      const post = await Post.findById(postId).select('author');
+      if (post) {
+        const postAuthorId = post.author.id;
+        const postAuthorType = post.author.type;
+        // If commenter is not the post author, notify
+        if (postAuthorId.toString() !== authorId.toString()) {
+          await notificationService.createNotification(
+            { id: postAuthorId, type: postAuthorType },
+            { id: authorId, type: authorType },
+            parentCommentId ? 'reply' : 'comment',
+            { id: parentCommentId || postId, type: parentCommentId ? 'Comment' : 'Post' }
+          );
+        }
+      }
+
+      // If it's a reply, also notify the parent comment author (if different)
+      if (parentCommentId) {
+        const parent = await Comment.findById(parentCommentId).select('author');
+        if (parent && parent.author.id.toString() !== authorId.toString()) {
+          await notificationService.createNotification(
+            { id: parent.author.id, type: parent.author.type },
+            { id: authorId, type: authorType },
+            'reply',
+            { id: savedComment._id, type: 'Comment' }
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Error creating comment notifications:', err);
     }
 
     return await this.getCommentWithAuthor(savedComment._id);
