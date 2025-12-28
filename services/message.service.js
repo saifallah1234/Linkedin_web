@@ -1,8 +1,9 @@
-const Message = require('../models/Message.model');
-const Notification = require('../models/Notification.model');
-
+const Message = require('../models/message.model');
+const notificationService = require('./notification.service');
 // Send a message
-exports.sendMessage = async (senderId, receiverId, content, attachments = []) => {
+exports.sendMessage = async (senderId, receiverId, content, attachments = [], senderType = 'User', receiverType = 'User') => {
+    
+    // 1. Création du message dans la base de données
     const message = await Message.create({
         senderId,
         receiverId,
@@ -10,20 +11,22 @@ exports.sendMessage = async (senderId, receiverId, content, attachments = []) =>
         attachments
     });
 
-    // Create a notification for the receiver
-    await Notification.create({
-        recipient: receiverId,
-        sender: senderId,
-        type: 'MESSAGE',
-        isRead: false
-    });
+    // 2. Déclenchement automatique de la notification via votre service
+    // On utilise await pour s'assurer que la logique de notification est traitée
+    await notificationService.createNotification(
+        { id: receiverId, type: receiverType }, // Destinataire
+        { id: senderId, type: senderType },     // Expéditeur
+        'message',                              // Type (doit être dans votre enum)
+        { id: message._id, type: 'message' }    // Entité liée (le message lui-même)
+    );
 
     return message;
 };
 
 // Get history between two users
 exports.getChatHistory = async (user1, user2) => {
-    // Mark messages as read when history is opened
+
+    // Mark messages as read
     await Message.updateMany(
         { senderId: user2, receiverId: user1, isRead: false },
         { $set: { isRead: true } }
@@ -34,7 +37,7 @@ exports.getChatHistory = async (user1, user2) => {
             { senderId: user1, receiverId: user2 },
             { senderId: user2, receiverId: user1 }
         ]
-    }).sort({ createdAt: 1 }); // Oldest to newest for chat flow
+    }).sort({ createdAt: 1 });
 };
 
 // Get the Conversation List (Inbox)
@@ -60,5 +63,4 @@ exports.getConversations = async (userId) => {
         },
         { $sort: { "lastMessage.createdAt": -1 } }
     ]);
-    // Note: You can add a $lookup stage here to populate user details (name, avatar)
 };
