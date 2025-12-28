@@ -13,22 +13,26 @@ exports.sendMessage = async (senderId, receiverId, content, attachments = [], se
     });
 
     // 2. Create the notification (OPTION B - entity based)
-    await Notification.create({
-        receiver: {
-            id: receiverId,
-            type: receiverType // 'User' or 'Company'
-        },
-        sender: {
-            id: senderId,
-            type: senderType // 'User' or 'Company'
-        },
-        type: 'message',
-        entity: {
-            id: message._id,
-            type: 'Message'
-        }
-    });
-
+    try{
+        await Notification.create({
+            receiver: {
+                id: receiverId,
+                type: receiverType // 'User' or 'Company'
+            },
+            sender: {
+                id: senderId,
+                type: senderType // 'User' or 'Company'
+            },
+            type: 'message',
+            entity: {
+                id: message._id,
+                type: 'message'
+            }
+        });
+    }catch (error) {
+        console.error("Failed to create notification:", error);
+        // Don't fail the message if notification fails
+    }
     return message;
 };
 

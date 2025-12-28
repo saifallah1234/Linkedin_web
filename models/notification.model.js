@@ -34,7 +34,8 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['new_post', 'reaction', 'comment', 'reply', 'job_offer' , 'message']
+    enum: ['new_post', 'reaction', 'comment', 'reply', 'job_offer' ,'connection_request',
+      'connection_accepted',  'company_post','message','job_application']
   },
   
   // --- 4. RELATED ENTITY (What is this about?) ---
@@ -47,9 +48,7 @@ const notificationSchema = new mongoose.Schema({
     type: { 
       type: String, 
       required: true, 
-      // Note: These must match your actual Mongoose Model names to work with populate()
-      // If your model is 'JobOffer', this string must be 'JobOffer'
-      enum: ['Post', 'Comment', 'JobOffer'] 
+            enum: ['Post', 'Reaction','Comment','Connection', 'JobOffer','JobApplication','message'] 
     }
   },
 

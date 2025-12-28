@@ -31,7 +31,14 @@ exports.getUserNotifications = async (userId, userRole) => {
     .populate('sender.id', 'name logo avatar')
     .populate('entity.id');
 };
+exports.getUnreadCount = async (userId) => {
+  return await Notification.countDocuments({ 'receiver.id': userId, isRead: false });
+};
 
+exports.markAllAsRead = async (userId) => {
+  const res = await Notification.updateMany({ 'receiver.id': userId, isRead: false }, { isRead: true });
+  return res.nModified || res.modifiedCount || 0;
+};
 exports.markAsRead = async (notificationId, userId) => {
   return await Notification.findOneAndUpdate(
     {
