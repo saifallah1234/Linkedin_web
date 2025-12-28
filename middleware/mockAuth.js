@@ -24,7 +24,7 @@ const mockProtect = (req, res, next) => {
     req.headers['x-dev-user-id'] || "694e61ab9868bde446870fc3";
 
   const DEV_ROLE =
-    req.headers['x-dev-role'] || "User"; // User | Company
+    req.headers['x-dev-role'] ||  "User";
 
   console.log(
     `⚠️ DEV MODE: Acting as ${DEV_ROLE} with ID: ${DEV_USER_ID}`
