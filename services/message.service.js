@@ -1,10 +1,9 @@
 const Message = require('../models/message.model');
-const Notification = require('../models/Notification.model');
-
+const notificationService = require('./notification.service');
 // Send a message
 exports.sendMessage = async (senderId, receiverId, content, attachments = [], senderType = 'User', receiverType = 'User') => {
     
-    // 1. Create the message
+    // 1. Création du message dans la base de données
     const message = await Message.create({
         senderId,
         receiverId,
@@ -12,27 +11,15 @@ exports.sendMessage = async (senderId, receiverId, content, attachments = [], se
         attachments
     });
 
-    // 2. Create the notification (OPTION B - entity based)
-    try{
-        await Notification.create({
-            receiver: {
-                id: receiverId,
-                type: receiverType // 'User' or 'Company'
-            },
-            sender: {
-                id: senderId,
-                type: senderType // 'User' or 'Company'
-            },
-            type: 'message',
-            entity: {
-                id: message._id,
-                type: 'message'
-            }
-        });
-    }catch (error) {
-        console.error("Failed to create notification:", error);
-        // Don't fail the message if notification fails
-    }
+    // 2. Déclenchement automatique de la notification via votre service
+    // On utilise await pour s'assurer que la logique de notification est traitée
+    await notificationService.createNotification(
+        { id: receiverId, type: receiverType }, // Destinataire
+        { id: senderId, type: senderType },     // Expéditeur
+        'message',                              // Type (doit être dans votre enum)
+        { id: message._id, type: 'message' }    // Entité liée (le message lui-même)
+    );
+
     return message;
 };
 
