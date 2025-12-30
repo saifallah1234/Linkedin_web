@@ -1,0 +1,105 @@
+<%- include('../partials/header', { hideNavbar: true, hideFooter: true, title: 'Create Account - Nexus' }) %>
+
+<div class="auth-page">
+    <!-- Left Column -->
+    <div class="auth-left">
+        <div class="mb-5">
+            <h1 class="display-4 fw-bold mb-4">News</h1>
+            <h2 class="mb-4">Your professional network, reimagined.</h2>
+            <p class="fs-5">Connect with opportunities, build meaningful relationships, and grow your career with AI-powered insights.</p>
+        </div>
+        
+        <div class="mt-4">
+            <h4 class="mb-3">Join 50,000+ professionals</h4>
+            <div class="d-flex gap-3">
+                <button class="btn-outline">Sign In</button>
+                <button class="btn-primary">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="auth-right">
+        <div class="auth-form">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Create an account</h2>
+                <p class="text-secondary">Start your professional journey today</p>
+            </div>
+
+            <form action="/auth/register" method="POST">
+                <!-- Account Type -->
+                <div class="mb-4">
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="flex-fill">
+                            <div class="card-nexus p-3 text-center cursor-pointer" onclick="selectAccountType('professional')">
+                                <i class="bi bi-person-badge fs-3 text-primary mb-2"></i>
+                                <h6 class="mb-1">Professional</h6>
+                                <p class="small text-secondary mb-0">Find opportunities</p>
+                            </div>
+                        </div>
+                        <div class="flex-fill">
+                            <div class="card-nexus p-3 text-center cursor-pointer" onclick="selectAccountType('company')">
+                                <i class="bi bi-building fs-3 text-primary mb-2"></i>
+                                <h6 class="mb-1">Company</h6>
+                                <p class="small text-secondary mb-0">Hire talent</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Name Fields -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">First name</label>
+                        <input type="text" class="form-input" value="John" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Last name</label>
+                        <input type="text" class="form-input" value="Doe" required>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" value="name@example.com" required>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group mb-4">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" value="********" required>
+                    <p class="small text-secondary mt-1">Minimum 8 characters</p>
+                </div>
+
+                <!-- Terms -->
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" id="terms" required>
+                    <label class="form-check-label" for="terms">
+                        I agree to the <a href="#" class="text-primary text-decoration-none">Terms of Service</a> and <a href="#" class="text-primary text-decoration-none">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary mb-3">Create account</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer', { hideNavbar: true, hideFooter: true }) %>
+
+<script>
+function selectAccountType(type) {
+    document.querySelectorAll('.card-nexus').forEach(card => {
+        card.style.border = '1px solid var(--border-color)';
+        card.style.background = 'white';
+    });
+    
+    const selectedCard = event.currentTarget;
+    selectedCard.style.border = '2px solid var(--primary-color)';
+    selectedCard.style.background = '#f0f7ff';
+    
+    // Set hidden input value
+    document.getElementById('accountType').value = type;
+}
+</script>

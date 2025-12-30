@@ -1,0 +1,533 @@
+<%- include('partials/header', { currentPage: 'notifications', title: 'Notifications - Nexus' }) %>
+
+<div class="container py-4">
+    <div class="notifications-page">
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Notifications List -->
+            <div class="col-lg-8">
+                <div class="notifications-container card-nexus">
+                    <!-- Header -->
+                    <div class="notifications-header p-4 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1 class="fw-bold mb-1">Notifications</h1>
+                                <p class="text-secondary mb-0">You have 3 unread notifications</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="notifications-action-btn mark-read-btn">
+                                    <i class="bi bi-check-all me-2"></i>Mark all as read
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="notifications-tabs px-4 pt-3">
+                        <div class="d-flex gap-1">
+                            <button class="notification-tab-btn active">All</button>
+                            <button class="notification-tab-btn">Unread</button>
+                            <button class="notification-tab-btn">Jobs</button>
+                            <button class="notification-tab-btn">Connections</button>
+                        </div>
+                    </div>
+
+                    <!-- Notifications List -->
+                    <div class="notifications-list">
+                        <!-- Unread Notification 1 -->
+                        <div class="notification-item unread p-3 border-bottom" data-id="1">
+                            <div class="d-flex align-items-start w-100">
+                                <div class="notification-avatar me-3 flex-shrink-0 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle" style="width: 40px; height: 40px;">
+                                    SC
+                                </div>
+                                <div class="notification-content flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <div class="notification-body me-3">
+                                        <p class="notification-text mb-1">
+                                            <strong>Sarah Chen liked your post</strong><br>
+                                            <span class="notification-preview text-secondary">"Excited to share that we just launched..."</span>
+                                        </p>
+                                        <span class="notification-time text-muted small">2 minutes ago</span>
+                                    </div>
+                                    <button class="notification-actions btn btn-link text-dark p-0 ms-auto flex-shrink-0">
+                                        <i class="bi bi-three-dots fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Unread Notification 2 -->
+                        <div class="notification-item unread p-3 border-bottom" data-id="2">
+                            <div class="d-flex align-items-start w-100">
+                                <div class="notification-avatar me-3 flex-shrink-0 d-flex align-items-center justify-content-center bg-success text-white rounded-circle" style="width: 40px; height: 40px;">
+                                    MW
+                                </div>
+                                <div class="notification-content flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <div class="notification-body me-3">
+                                        <p class="notification-text mb-1">
+                                            <strong>Marcus Williams commented on your post</strong><br>
+                                            <span class="notification-preview text-secondary">"Great insights! I especially agree with..."</span>
+                                        </p>
+                                        <span class="notification-time text-muted small">15 minutes ago</span>
+                                    </div>
+                                    <button class="notification-actions btn btn-link text-dark p-0 ms-auto flex-shrink-0">
+                                        <i class="bi bi-three-dots fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Unread Notification 3 -->
+                        <div class="notification-item unread p-3 border-bottom" data-id="3">
+                            <div class="d-flex align-items-start w-100">
+                                <div class="notification-avatar me-3 flex-shrink-0 d-flex align-items-center justify-content-center bg-info text-white rounded-circle" style="width: 40px; height: 40px;">
+                                    ER
+                                </div>
+                                <div class="notification-content flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <div class="notification-body me-3">
+                                        <p class="notification-text mb-1">
+                                            <strong>Emily Rodriguez accepted your connection request</strong><br>
+                                            <span class="notification-preview text-secondary">You are now connected</span>
+                                        </p>
+                                        <span class="notification-time text-muted small">1 hour ago</span>
+                                    </div>
+                                    <button class="notification-actions btn btn-link text-dark p-0 ms-auto flex-shrink-0">
+                                        <i class="bi bi-three-dots fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Read Notifications -->
+                        <div class="notification-item p-3 border-bottom" data-id="4">
+                            <div class="d-flex align-items-start w-100">
+                                <div class="notification-avatar me-3 flex-shrink-0 d-flex align-items-center justify-content-center bg-warning text-white rounded-circle" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-briefcase fs-5"></i>
+                                </div>
+                                <div class="notification-content flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <div class="notification-body me-3">
+                                        <p class="notification-text mb-1">
+                                            <strong>New job matching your profile</strong><br>
+                                            <span class="notification-preview text-secondary">Senior Product Designer at TechCorp - San Francisco</span>
+                                        </p>
+                                        <span class="notification-time text-muted small">3 hours ago</span>
+                                    </div>
+                                    <button class="notification-actions btn btn-link text-dark p-0 ms-auto flex-shrink-0">
+                                        <i class="bi bi-three-dots fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notification-item p-3 border-bottom" data-id="5">
+                            <div class="d-flex align-items-start w-100">
+                                <div class="notification-avatar me-3 flex-shrink-0 d-flex align-items-center justify-content-center bg-purple text-white rounded-circle" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-building fs-5"></i>
+                                </div>
+                                <div class="notification-content flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <div class="notification-body me-3">
+                                        <p class="notification-text mb-1">
+                                            <strong>DesignStudio is hiring</strong><br>
+                                            <span class="notification-preview text-secondary">3 new positions matching your skills</span>
+                                        </p>
+                                        <span class="notification-time text-muted small">5 hours ago</span>
+                                    </div>
+                                    <button class="notification-actions btn btn-link text-dark p-0 ms-auto flex-shrink-0">
+                                        <i class="bi bi-three-dots fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notification-item p-3 border-bottom" data-id="6">
+                            <div class="d-flex align-items-start w-100">
+                                <div class="notification-avatar me-3 flex-shrink-0 d-flex align-items-center justify-content-center bg-secondary text-white rounded-circle" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-megaphone fs-5"></i>
+                                </div>
+                                <div class="notification-content flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <div class="notification-body me-3">
+                                        <p class="notification-text mb-1">
+                                            <strong>Company announcement from TechCorp</strong><br>
+                                            <span class="notification-preview text-secondary">Q4 All Hands Meeting scheduled for next Friday</span>
+                                        </p>
+                                        <span class="notification-time text-muted small">Yesterday</span>
+                                    </div>
+                                    <button class="notification-actions btn btn-link text-dark p-0 ms-auto flex-shrink-0">
+                                        <i class="bi bi-three-dots fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Stats Section -->
+                <div class="notification-stats card-nexus mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Notification Stats</h5>
+                        <div class="stats-grid">
+                            <div class="stat-item text-center p-3">
+                                <div class="stat-number fw-bold display-6">156</div>
+                                <div class="stat-label text-secondary mt-2">Post likes</div>
+                            </div>
+                            <div class="stat-item text-center p-3">
+                                <div class="stat-number fw-bold display-6">34</div>
+                                <div class="stat-label text-secondary mt-2">Comments</div>
+                            </div>
+                            <div class="stat-item text-center p-3">
+                                <div class="stat-number fw-bold display-6">12</div>
+                                <div class="stat-label text-secondary mt-2">New connections</div>
+                            </div>
+                            <div class="stat-item text-center p-3">
+                                <div class="stat-number fw-bold display-6">8</div>
+                                <div class="stat-label text-secondary mt-2">Job alerts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Settings -->
+                <div class="quick-settings card-nexus">
+                    <div class="card-header p-3">
+                        <h6 class="mb-0 fw-bold">Quick Settings</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="settings-list">
+                            <div class="setting-item d-flex justify-content-between align-items-center mb-3">
+                                <span class="setting-label">Email notifications</span>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input setting-toggle" type="checkbox" id="emailNotifications" checked>
+                                </div>
+                            </div>
+                            <div class="setting-item d-flex justify-content-between align-items-center mb-3">
+                                <span class="setting-label">Push notifications</span>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input setting-toggle" type="checkbox" id="pushNotifications" checked>
+                                </div>
+                            </div>
+                            <div class="setting-item d-flex justify-content-between align-items-center mb-3">
+                                <span class="setting-label">Job alerts</span>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input setting-toggle" type="checkbox" id="jobAlerts" checked>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<style>
+    /* Add these styles to fix the notifications layout */
+    .notification-content {
+        display: flex;
+        width: 100%;
+        align-items: flex-start;
+    }
+    
+    .notification-body {
+        flex: 1;
+        min-width: 0; /* Prevents text overflow */
+    }
+    
+    .notification-actions {
+        flex-shrink: 0;
+        align-self: flex-start;
+        margin-left: auto !important;
+    }
+    
+    .notification-text {
+        line-height: 1.4;
+    }
+    
+    .notification-preview {
+        display: block;
+        margin-top: 2px;
+        font-size: 0.9em;
+    }
+    
+    .notification-time {
+        display: block;
+        margin-top: 4px;
+    }
+    
+    /* Fix for small screens */
+    @media (max-width: 768px) {
+        .notification-avatar {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 0.8rem !important;
+        }
+        
+        .notification-actions {
+            margin-left: 8px !important;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.notification-tab-btn');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter notifications based on selected tab
+            const tab = this.textContent.toLowerCase();
+            filterNotifications(tab);
+        });
+    });
+
+    // Mark all as read
+    const markReadBtn = document.querySelector('.mark-read-btn');
+    if (markReadBtn) {
+        markReadBtn.addEventListener('click', function() {
+            const unreadNotifications = document.querySelectorAll('.notification-item.unread');
+            let unreadCount = unreadNotifications.length;
+            
+            unreadNotifications.forEach(notification => {
+                notification.classList.remove('unread');
+            });
+            
+            // Update unread count in header
+            updateUnreadCount(0);
+            
+            // Show success message
+            showNotificationToast(`${unreadCount} notifications marked as read`);
+        });
+    }
+
+    // Mark single notification as read
+    const notificationItems = document.querySelectorAll('.notification-item');
+    notificationItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (!e.target.closest('.notification-actions')) {
+                this.classList.remove('unread');
+                
+                // Update unread count
+                const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+                updateUnreadCount(unreadCount);
+            }
+        });
+        
+        // Notification actions menu
+        const actionsBtn = item.querySelector('.notification-actions');
+        if (actionsBtn) {
+            actionsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const notificationId = item.getAttribute('data-id');
+                showNotificationMenu(this, notificationId);
+            });
+        }
+    });
+
+    // Settings toggles
+    const settingToggles = document.querySelectorAll('.setting-toggle');
+    settingToggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const settingName = this.id === 'emailNotifications' ? 'Email notifications' : 
+                              this.id === 'pushNotifications' ? 'Push notifications' : 'Job alerts';
+            const status = this.checked ? 'enabled' : 'disabled';
+            showNotificationToast(`${settingName} ${status}`);
+        });
+    });
+
+    // Filter notifications by tab
+    function filterNotifications(tab) {
+        const allNotifications = document.querySelectorAll('.notification-item');
+        
+        allNotifications.forEach(notification => {
+            let show = false;
+            
+            switch(tab) {
+                case 'all':
+                    show = true;
+                    break;
+                case 'unread':
+                    show = notification.classList.contains('unread');
+                    break;
+                case 'jobs':
+                    const avatar = notification.querySelector('.notification-avatar');
+                    const isJob = avatar.querySelector('i')?.classList.contains('bi-briefcase') || 
+                                 avatar.querySelector('i')?.classList.contains('bi-building');
+                    const text = notification.textContent.toLowerCase();
+                    show = isJob || text.includes('job') || text.includes('hiring');
+                    break;
+                case 'connections':
+                    const avatarContent = notification.querySelector('.notification-avatar').textContent;
+                    const isConnection = avatarContent.includes('ER') || avatarContent.includes('MW') || avatarContent.includes('SC') ||
+                                        notification.textContent.toLowerCase().includes('connected') ||
+                                        notification.textContent.toLowerCase().includes('connection');
+                    show = isConnection;
+                    break;
+            }
+            
+            notification.style.display = show ? 'flex' : 'none';
+        });
+    }
+
+    // Update unread count in header
+    function updateUnreadCount(count) {
+        const headerText = document.querySelector('.notifications-header p');
+        if (headerText) {
+            if (count === 0) {
+                headerText.textContent = 'You have no unread notifications';
+            } else {
+                headerText.textContent = `You have ${count} unread notification${count === 1 ? '' : 's'}`;
+            }
+        }
+    }
+
+    // Show notification menu
+    function showNotificationMenu(button, notificationId) {
+        // Remove existing menu
+        const existingMenu = document.querySelector('.notification-context-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+        }
+        
+        // Create menu
+        const menu = document.createElement('div');
+        menu.className = 'notification-context-menu';
+        menu.innerHTML = `
+            <button class="menu-item" data-action="mark-read">
+                <i class="bi bi-check me-2"></i>Mark as read
+            </button>
+            <button class="menu-item" data-action="delete">
+                <i class="bi bi-trash me-2"></i>Delete notification
+            </button>
+        `;
+        
+        // Position menu
+        const rect = button.getBoundingClientRect();
+        menu.style.cssText = `
+            position: fixed;
+            top: ${rect.bottom + 5}px;
+            right: ${window.innerWidth - rect.right}px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 9999;
+            min-width: 200px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        `;
+        
+        document.body.appendChild(menu);
+        
+        // Add styles for menu items
+        const style = document.createElement('style');
+        style.textContent = `
+            .notification-context-menu .menu-item {
+                width: 100%;
+                padding: 10px 16px;
+                border: none;
+                background: transparent;
+                text-align: left;
+                font-size: 0.9rem;
+                color: var(--text-dark);
+                cursor: pointer;
+                transition: background 0.2s ease;
+            }
+            
+            .notification-context-menu .menu-item:hover {
+                background: var(--primary-light);
+            }
+            
+            .notification-context-menu .menu-item i {
+                width: 20px;
+                text-align: center;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Handle menu actions
+        menu.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const action = this.getAttribute('data-action');
+                handleNotificationAction(action, notificationId);
+                menu.remove();
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function closeMenu(e) {
+            if (!menu.contains(e.target) && e.target !== button) {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            }
+        });
+    }
+
+    // Handle notification actions
+    function handleNotificationAction(action, notificationId) {
+        const notification = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
+        
+        switch(action) {
+            case 'mark-read':
+                notification.classList.remove('unread');
+                updateUnreadCount(document.querySelectorAll('.notification-item.unread').length);
+                showNotificationToast('Notification marked as read');
+                break;
+            case 'delete':
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    notification.remove();
+                    const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+                    updateUnreadCount(unreadCount);
+                }, 300);
+                showNotificationToast('Notification deleted');
+                break;
+        }
+    }
+
+    // Show notification toast
+    function showNotificationToast(message) {
+        // Remove existing toast
+        const existingToast = document.querySelector('.notification-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.className = 'notification-toast';
+        toast.textContent = message;
+        
+        // Add styles
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-dark);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 9999;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: slideUp 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideDown 0.3s ease-out';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // Initialize
+    updateUnreadCount(document.querySelectorAll('.notification-item.unread').length);
+});
+</script>

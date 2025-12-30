@@ -1,0 +1,775 @@
+<%- include('partials/header', { title: 'Alex Johnson - Nexus' }) %>
+
+<div class="profile-page">
+    <div class="profile-container">
+        <!-- Profile Header with Background -->
+        <div class="profile-header-bg">
+            <!-- Header Action Buttons -->
+            <div class="profile-header-actions">
+                <button class="header-action-btn" title="Edit Profile" onclick="openEditForm('profile')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="header-action-btn" title="Share Profile">
+                    <i class="bi bi-share"></i>
+                </button>
+                <button class="header-action-btn" title="Download Resume">
+                    <i class="bi bi-download"></i>
+                </button>
+            </div>
+            
+            <div class="profile-header-content">
+                <!-- Avatar with Upload Overlay -->
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar-large">
+                        AJ
+                    </div>
+                    <div class="avatar-upload-overlay" onclick="openUploadPhoto()">
+                        <i class="bi bi-camera-fill me-2"></i>
+                        Change Photo
+                    </div>
+                </div>
+                
+                <div class="profile-main-info">
+                    <h1>Alex Johnson</h1>
+                    <p class="profile-title">Senior Product Designer | UX/UI Expert | Design Systems</p>
+                    <div class="profile-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>San Francisco, CA</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-people"></i>
+                            <span>523 connections</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two Column Content -->
+        <div class="profile-content">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- About Section -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <h3 class="section-title">About</h3>
+                        <div class="section-actions">
+                            <button class="action-btn edit" title="Edit About" onclick="openEditForm('about')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="about-text">
+                        <p>Passionate product designer with 8+ years of experience crafting intuitive digital experiences. I specialize in design systems, user research, and creating products that people love to use. Currently leading design initiatives at TechCorp, where I've helped increase user engagement by 40%.</p>
+                        <p>I believe great design is invisible—it should feel natural and effortless. My approach combines deep user empathy with data-driven insights to create solutions that truly matter.</p>
+                    </div>
+                </section>
+
+                <!-- Experience Section -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <h3 class="section-title">Experience</h3>
+                        <div class="section-actions">
+                            <button class="action-btn add" title="Add Experience" onclick="openEditForm('experience', 'add')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="experience-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit" onclick="openEditForm('experience', '1')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="experience-title">Senior Product Designer</h4>
+                        <div class="experience-company">TechCorp</div>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-calendar"></i> 2018 - Present</span>
+                            <span><i class="bi bi-geo-alt"></i> San Francisco, CA</span>
+                        </div>
+                        <p class="experience-description">Currently leading design initiatives at TechCorp, where I've helped increase user engagement by 40%. Spearheaded the development of a comprehensive design system used by 50+ designers.</p>
+                    </div>
+                    <div class="experience-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit" onclick="openEditForm('experience', '2')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="experience-title">UX/UI Designer</h4>
+                        <div class="experience-company">DesignAgency</div>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-calendar"></i> Jun 2016 - Feb 2018</span>
+                            <span><i class="bi bi-geo-alt"></i> Los Angeles, CA</span>
+                        </div>
+                        <p class="experience-description">Worked with diverse clients including Fortune 500 companies. Created wireframes, prototypes, and high-fidelity designs for web and mobile applications.</p>
+                    </div>
+                    <div class="add-item-section">
+                        <button class="add-item-btn" onclick="openEditForm('experience', 'add')">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Experience
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Education Section -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h3 class="section-title">Education</h3>
+                        <div class="section-actions">
+                            <button class="action-btn add" title="Add Education" onclick="openEditForm('education', 'add')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="education-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit" onclick="openEditForm('education', '1')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="education-school">Stanford University</h4>
+                        <div class="education-degree">Master of Science in Human-Computer Interaction</div>
+                        <div class="education-year">
+                            <i class="bi bi-calendar"></i> 2014 - 2016
+                        </div>
+                    </div>
+                    <div class="education-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit" onclick="openEditForm('education', '2')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="education-school">UCLA</h4>
+                        <div class="education-degree">Bachelor of Arts in Design Media Arts</div>
+                        <div class="education-year">
+                            <i class="bi bi-calendar"></i> 2010 - 2014
+                        </div>
+                    </div>
+                    <div class="add-item-section">
+                        <button class="add-item-btn" onclick="openEditForm('education', 'add')">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Education
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Skills Section -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-tools"></i>
+                        </div>
+                        <h3 class="section-title">Skills</h3>
+                        <div class="section-actions">
+                            <button class="action-btn add add-skill-inline" title="Add Skill" onclick="openEditForm('skills')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="skills-grid">
+                        <div class="skill-tag">
+                            Product Design
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            UX Research
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            UI Design
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Design Systems
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Figma
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Prototyping
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            User Testing
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Wireframing
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Information Architecture
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Interaction Design
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Visual Design
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Adobe Creative Suite
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="add-item-section">
+                        <div class="skill-input-container">
+                            <input type="text" class="form-input skill-input" placeholder="Add new skill...">
+                            <button class="add-skill-btn">Add</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Contact Info -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <h3 class="section-title">Contact Info</h3>
+                        <div class="section-actions">
+                            <button class="action-btn edit" title="Edit Contact Info" onclick="openEditForm('contact')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="contact-list">
+                        <div class="contact-item">
+                            <div class="contact-actions">
+                                <button class="item-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="item-btn delete" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="contact-icon">
+                                <i class="bi bi-envelope"></i>
+                            </div>
+                            <span>alex.johnson@email.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-actions">
+                                <button class="item-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="item-btn delete" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="contact-icon">
+                                <i class="bi bi-telephone"></i>
+                            </div>
+                            <span>+1 (555) 123-4567</span>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-actions">
+                                <button class="item-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="item-btn delete" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="contact-icon">
+                                <i class="bi bi-globe"></i>
+                            </div>
+                            <span>alexjohnson.design</span>
+                        </div>
+                    </div>
+                    <div class="add-item-section">
+                        <button class="add-item-btn" onclick="openEditForm('contact', 'add')">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Contact Method
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Certifications -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-award"></i>
+                        </div>
+                        <h3 class="section-title">Certifications</h3>
+                        <div class="section-actions">
+                            <button class="action-btn add" title="Add Certification" onclick="openEditForm('certifications', 'add')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="certification-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit" onclick="openEditForm('certifications', '1')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="cert-name">Google UX Design Certificate</h4>
+                        <div class="cert-meta">
+                            <span>Google</span>
+                            <span>•</span>
+                            <span>2023</span>
+                        </div>
+                        <div class="cert-description">
+                            Professional certification in user experience design principles and methodologies.
+                        </div>
+                    </div>
+                    <div class="certification-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit" onclick="openEditForm('certifications', '2')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="cert-name">Certified Usability Analyst</h4>
+                        <div class="cert-meta">
+                            <span>Human Factors International</span>
+                            <span>•</span>
+                            <span>2022</span>
+                        </div>
+                        <div class="cert-description">
+                            Certified Usability Analyst for activating Windows. Human Services International.
+                        </div>
+                    </div>
+                    <div class="add-item-section">
+                        <button class="add-item-btn" onclick="openEditForm('certifications', 'add')">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Certification
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Photo Modal -->
+<div class="edit-form-overlay" id="uploadPhotoModal">
+    <div class="edit-form-container">
+        <div class="upload-modal-content">
+            <div class="edit-form-header">
+                <h3 class="edit-form-title">Upload Profile Photo</h3>
+                <button class="close-form-btn" onclick="closeUploadPhoto()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                </div>
+                <p class="upload-text">Click to upload or drag and drop</p>
+                <p class="upload-hint">PNG, JPG or GIF (Max 5MB)</p>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="previewImage(this)">
+            </div>
+            <img id="imagePreview" class="upload-preview" src="" alt="Preview">
+            <div class="upload-actions">
+                <button class="btn-upload" onclick="uploadPhoto()">Upload Photo</button>
+                <button class="btn-remove" onclick="removePhoto()">Remove Current</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Form Modal -->
+<div class="edit-form-overlay" id="editFormModal">
+    <div class="edit-form-container">
+        <div class="edit-form-header">
+            <h3 class="edit-form-title" id="editFormTitle">Edit Profile</h3>
+            <button class="close-form-btn" onclick="closeEditForm()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <form id="editProfileForm">
+            <!-- Form content will be dynamically inserted here -->
+            <div id="formContent">
+                <!-- Dynamic form fields will go here -->
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Save Changes</button>
+                <button type="button" class="btn-cancel" onclick="closeEditForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+// Modal Functions
+function openUploadPhoto() {
+    document.getElementById('uploadPhotoModal').classList.add('active');
+}
+
+function closeUploadPhoto() {
+    document.getElementById('uploadPhotoModal').classList.remove('active');
+    document.getElementById('imagePreview').classList.remove('active');
+    document.getElementById('imagePreview').src = '';
+}
+
+function openEditForm(type, id = '') {
+    const modal = document.getElementById('editFormModal');
+    const title = document.getElementById('editFormTitle');
+    const formContent = document.getElementById('formContent');
+    
+    let formHTML = '';
+    
+    switch(type) {
+        case 'profile':
+            title.textContent = 'Edit Profile';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" value="Alex Johnson" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-input" value="Senior Product Designer | UX/UI Expert | Design Systems">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" value="San Francisco, CA">
+                </div>
+            `;
+            break;
+            
+        case 'about':
+            title.textContent = 'Edit About';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">About You</label>
+                    <textarea class="form-input form-textarea">Passionate product designer with 8+ years of experience crafting intuitive digital experiences. I specialize in design systems, user research, and creating products that people love to use. Currently leading design initiatives at TechCorp, where I've helped increase user engagement by 40%.
+
+I believe great design is invisible—it should feel natural and effortless. My approach combines deep user empathy with data-driven insights to create solutions that truly matter.</textarea>
+                </div>
+            `;
+            break;
+            
+        case 'experience':
+            title.textContent = id === 'add' ? 'Add Experience' : 'Edit Experience';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Job Title</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Senior Product Designer'}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'TechCorp'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'San Francisco, CA'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Date</label>
+                    <input type="month" class="form-input" value="${id === 'add' ? '' : '2018-01'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Date</label>
+                    <input type="month" class="form-input" value="${id === 'add' ? '' : ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input form-textarea">${id === 'add' ? '' : 'Currently leading design initiatives at TechCorp, where I\'ve helped increase user engagement by 40%. Spearheaded the development of a comprehensive design system used by 50+ designers.'}</textarea>
+                </div>
+            `;
+            break;
+            
+        case 'education':
+            title.textContent = id === 'add' ? 'Add Education' : 'Edit Education';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">School/University</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Stanford University'}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Degree</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Master of Science in Human-Computer Interaction'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Field of Study</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Human-Computer Interaction'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Year</label>
+                    <input type="number" class="form-input" min="1900" max="2099" value="${id === 'add' ? '' : '2014'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Year</label>
+                    <input type="number" class="form-input" min="1900" max="2099" value="${id === 'add' ? '' : '2016'}">
+                </div>
+            `;
+            break;
+            
+        case 'skills':
+            title.textContent = 'Add Skills';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Add New Skill</label>
+                    <input type="text" class="form-input" placeholder="Enter skill name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Proficiency Level</label>
+                    <select class="form-input">
+                        <option>Beginner</option>
+                        <option>Intermediate</option>
+                        <option>Advanced</option>
+                        <option>Expert</option>
+                    </select>
+                </div>
+            `;
+            break;
+            
+        case 'contact':
+            title.textContent = 'Edit Contact Info';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" value="alex.johnson@email.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" value="+1 (555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Website</label>
+                    <input type="url" class="form-input" value="alexjohnson.design">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">LinkedIn</label>
+                    <input type="url" class="form-input" placeholder="https://linkedin.com/in/...">
+                </div>
+            `;
+            break;
+            
+        case 'certifications':
+            title.textContent = id === 'add' ? 'Add Certification' : 'Edit Certification';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Certification Name</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Google UX Design Certificate'}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Issuing Organization</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Google'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Issue Date</label>
+                    <input type="month" class="form-input" value="${id === 'add' ? '' : '2023-01'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expiration Date (if any)</label>
+                    <input type="month" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input form-textarea">${id === 'add' ? '' : 'Professional certification in user experience design principles and methodologies.'}</textarea>
+                </div>
+            `;
+            break;
+    }
+    
+    formContent.innerHTML = formHTML;
+    modal.classList.add('active');
+}
+
+function closeEditForm() {
+    document.getElementById('editFormModal').classList.remove('active');
+}
+
+// Image Upload Functions
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.add('active');
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function uploadPhoto() {
+    // In a real app, you would upload the image to your server
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput.files.length > 0) {
+        alert('Photo uploaded successfully!');
+        closeUploadPhoto();
+    } else {
+        alert('Please select a photo first.');
+    }
+}
+
+function removePhoto() {
+    if (confirm('Are you sure you want to remove your profile photo?')) {
+        // In a real app, you would remove the photo from the server
+        alert('Profile photo removed.');
+        closeUploadPhoto();
+    }
+}
+
+// Form Submission
+document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // In a real app, you would send the form data to your server
+    alert('Changes saved successfully!');
+    closeEditForm();
+});
+
+// Close modals when clicking outside
+document.querySelectorAll('.edit-form-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+});
+
+// Add skill functionality
+document.querySelector('.add-skill-btn').addEventListener('click', function() {
+    const input = document.querySelector('.skill-input');
+    const skillName = input.value.trim();
+    
+    if (skillName) {
+        const skillsGrid = document.querySelector('.skills-grid');
+        const newSkill = document.createElement('div');
+        newSkill.className = 'skill-tag';
+        newSkill.innerHTML = `
+            ${skillName}
+            <div class="skill-actions">
+                <button class="skill-btn edit" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="skill-btn delete" title="Delete">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        `;
+        skillsGrid.appendChild(newSkill);
+        input.value = '';
+        
+        // Add event listeners to new skill buttons
+        newSkill.querySelector('.skill-btn.delete').addEventListener('click', function() {
+            newSkill.remove();
+        });
+    }
+});
+</script>

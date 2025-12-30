@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicant Management - Nexus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        /* Your existing styles from the applicant management page */
+        :root {
+            --primary-orange: #FF7A18;
+            --orange-light: #FFF5EE;
+            --text-dark: #1a1a1a;
+            --text-medium: #4a4a4a;
+            --text-light: #787878;
+            --border-color: #E5E7EB;
+            --bg-light: #F9FAFB;
+            --success-green: #10B981;
+            --warning-orange: #F59E0B;
+            --active-green: #D1FAE5;
+            --active-green-text: #059669;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            --light-blue: #EFF6FF;
+            --light-green: #ECFDF5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        /* Main Container */
+        .container-main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        /* Job Header */
+        .job-header {
+            margin-bottom: 32px;
+        }
+
+        .job-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .job-title-main {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .job-subtitle {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--orange-light);
+            color: var(--primary-orange);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            color: var(--success-green);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-change i {
+            font-size: 12px;
+        }
+
+        /* Export All Card - Updated */
+        .export-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .export-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border-color: var(--primary-orange);
+        }
+
+        .export-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--orange-light);
+            color: var(--primary-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .export-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .export-desc {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Email Options */
+        .email-options {
+            margin-top: 12px;
+        }
+
+        .email-option {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .email-option i {
+            font-size: 12px;
+        }
+
+        /* Main Applicant Card Container */
+        .applicant-card-container {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Applicant Header */
+        .applicant-header {
+            display: flex;
+            align-items: flex-start;
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .applicant-avatar {
+            width: 60px;
+            height: 60px;
+            background: var(--orange-light);
+            color: var(--primary-orange);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 600;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .applicant-info {
+            flex: 1;
+        }
+
+        .applicant-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .applicant-title {
+            font-size: 14px;
+            color: var(--text-medium);
+            margin-bottom: 12px;
+        }
+
+        /* Applicant Meta */
+        .applicant-meta {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-item i {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* Skills Tags */
+        .skills-section {
+            margin-bottom: 16px;
+        }
+
+        .skills-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: var(--light-blue);
+            color: #2563EB;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #DBEAFE;
+        }
+
+        .skill-tag.more {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .skill-tag.more i {
+            font-size: 12px;
+        }
+
+        /* AI Score Section */
+        .ai-score-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding: 24px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .ai-score-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .ai-score-item {
+            text-align: center;
+        }
+
+        .ai-score-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-score-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary-orange);
+            line-height: 1;
+        }
+
+        .ai-score-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .match-score-item {
+            text-align: center;
+        }
+
+        .match-score-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .match-score-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--success-green);
+            line-height: 1;
+        }
+
+        .match-score-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-details {
+            text-align: center;
+        }
+
+        .score-detail-item {
+            font-size: 13px;
+            color: var(--text-medium);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .score-detail-value {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Action Buttons */
+        .actions-section {
+            display: flex;
+            gap: 12px;
+            padding: 20px 24px;
+            justify-content: flex-end;
+        }
+
+        .btn-action {
+            padding: 10px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-action:hover {
+            background: var(--bg-light);
+            border-color: var(--text-medium);
+        }
+
+        .btn-action.primary {
+            background: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
+        }
+
+        .btn-action.primary:hover {
+            background: #E66A0F;
+        }
+
+        /* Email Candidate Button */
+        .btn-action.email {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .btn-action.email:hover {
+            background: #2563EB;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-light);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        /* Minimal Applicant Card */
+        .minimal-applicant {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
+
+        .minimal-applicant:hover {
+            opacity: 1;
+            box-shadow: var(--card-shadow);
+        }
+
+        .applicant-minimal {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .applicant-mini-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--border-color);
+            color: var(--text-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .applicant-mini-details {
+            flex: 1;
+        }
+
+        .applicant-mini-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .applicant-mini-role {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Profile Modal Styles */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .profile-modal.active {
+            display: flex;
+        }
+
+        .profile-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .profile-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 20px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .profile-close:hover {
+            background: var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            background: var(--orange-light);
+            color: var(--primary-orange);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .profile-title {
+            font-size: 15px;
+            color: var(--text-medium);
+            margin-bottom: 8px;
+        }
+
+        .new-badge {
+            display: inline-block;
+            background: var(--success-green);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .profile-contact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-medium);
+        }
+
+        .contact-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            flex-shrink: 0;
+        }
+
+        .contact-info {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+
+        .profile-location {
+            background: var(--bg-light);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .location-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-medium);
+            margin-bottom: 4px;
+        }
+
+        .location-item i {
+            width: 20px;
+        }
+
+        /* AI Score Section in Modal */
+        .modal-ai-section {
+            padding: 20px 24px;
+            background: var(--bg-light);
+            margin-bottom: 20px;
+            border-radius: 12px;
+        }
+
+        .modal-ai-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .modal-ai-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            width: 100px;
+            height: 100px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .modal-ai-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-orange);
+            line-height: 1;
+        }
+
+        .modal-ai-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .modal-ai-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .breakdown-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .breakdown-label {
+            font-size: 13px;
+            color: var(--text-medium);
+            margin-bottom: 4px;
+        }
+
+        .breakdown-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .breakdown-value.skills {
+            color: #2563EB;
+        }
+
+        .breakdown-value.experience {
+            color: var(--success-green);
+        }
+
+        .breakdown-value.education {
+            color: #8B5CF6;
+        }
+
+        .breakdown-value.cultural {
+            color: var(--warning-orange);
+        }
+
+        /* Skills Section in Modal */
+        .modal-skills {
+            padding: 0 24px;
+            margin-bottom: 24px;
+        }
+
+        .modal-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+        }
+
+        .modal-skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-skills-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .modal-skill-tag {
+            background: var(--light-blue);
+            color: #2563EB;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            border: 1px solid #DBEAFE;
+        }
+
+        /* Modal Actions - Updated (removed shortlist) */
+        .modal-actions {
+            padding: 0 24px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .modal-btn.resume {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        .modal-btn.resume:hover {
+            background: #E66A0F;
+        }
+
+        .modal-btn.interview {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .modal-btn.interview:hover {
+            background: #059669;
+        }
+
+        /* Email button for main actions */
+        .modal-btn.email {
+            background: #3B82F6;
+            color: white;
+            border: 1px solid #3B82F6;
+        }
+
+        .modal-btn.email:hover {
+            background: #2563EB;
+        }
+
+        /* Manage Applicants Button */
+        .btn-manage-applicants {
+            background: var(--primary-orange);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-manage-applicants:hover {
+            background: #E66A0F;
+        }
+    </style>
+</head>
+<body>
+<%- include('partials/header', { currentPage: 'home', title: 'Dashboard - Nexus' }) %>
+
+    <!-- Main Container -->
+    <div class="container-main">
+        <!-- Job Header -->
+        <div class="job-header">
+            <div class="job-title-row">
+                <h1 class="job-title-main">Senior Frontend Developer</h1>
+            
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <!-- Total Applicants -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Total Applicants</span>
+                    <div class="stat-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <div class="stat-value">5</div>
+            </div>
+
+            <!-- New Applications -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">New Applications</span>
+                    <div class="stat-icon">
+                        <i class="bi bi-plus-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value">1</div>
+                <div class="stat-change">
+                    <i class="bi bi-arrow-up"></i>
+                    +3 today
+                </div>
+            </div>
+
+
+            <!-- Export All - Updated -->
+            <div class="export-card" onclick="exportApplicants()">
+                <div class="export-icon">
+                    <i class="bi bi-download"></i>
+                </div>
+                <div class="export-label">Export All</div>
+                <div class="export-desc">Download all applicant data</div>
+            </div>
+        </div>
+         
+            
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2 class="section-title">Applicants</h2>
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search applicants...">
+            </div>
+        </div>
+
+        <!-- Main Applicant Card -->
+        <div class="applicant-card-container">
+            <!-- Applicant Header -->
+            <div class="applicant-header">
+                <div class="applicant-avatar">SC</div>
+                <div class="applicant-info">
+                    <h3 class="applicant-name">Sarah Chen</h3>
+                    <p class="applicant-title">Senior Frontend Developer at Meta</p>
+                    
+                    <div class="applicant-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-geo-alt"></i>
+                            San Francisco, CA
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-clock-history"></i>
+                            6 years
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-calendar"></i>
+                            Applied 2 days ago
+                        </div>
+                    </div>
+
+                    <div class="skills-section">
+                        <div class="skills-tags">
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">TypeScript</span>
+                            <span class="skill-tag">Node.js</span>
+                            <span class="skill-tag">GraphQL</span>
+                            <span class="skill-tag more">
+                                +1 more <i class="bi bi-chevron-down"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Score Section -->
+            <div class="ai-score-section">
+                <div class="ai-score-item">
+                    <div class="ai-score-main">
+                        <div class="ai-score-value">95%</div>
+                        <div class="ai-score-label">AI Status</div>
+                    </div>
+                </div>
+
+                <div class="match-score-item">
+                    <div class="match-score-main">
+                        <div class="match-score-value">98%</div>
+                        <div class="ai-score-label">AI Match Score</div>
+                    </div>
+                </div>
+
+                <div class="score-details">
+                    <div class="score-detail-item">
+                        <span>Skills</span>
+                        <span class="score-detail-value">98%</span>
+                    </div>
+                    <div class="score-detail-item">
+                        <span>Experience</span>
+                        <span class="score-detail-value">94%</span>
+                    </div>
+                    <div class="score-detail-item">
+                        <span>Cultural Fit</span>
+                        <span class="score-detail-value">96%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons - Updated (removed three dots, added email button) -->
+            <div class="actions-section">
+                <button class="btn-action view-profile-btn">
+                    <i class="bi bi-person"></i>
+                    View Profile
+                </button>
+                <button class="btn-action primary">
+                    <i class="bi bi-file-text"></i>
+                    Resume
+                </button>
+                <button class="btn-action email" onclick="emailCandidate('Sarah Chen')">
+                    <i class="bi bi-envelope"></i>
+                    Email Candidate
+                </button>
+            </div>
+        </div>
+
+        <!-- Minimal Applicant Cards -->
+        <div class="minimal-applicant">
+            <div class="applicant-minimal">
+                <div class="applicant-mini-avatar">ER</div>
+                <div class="applicant-mini-details">
+                    <div class="applicant-mini-name">Emily Rodriguez</div>
+                    <div class="applicant-mini-role">Lead Developer at Shopify</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-modal-content">
+            <!-- Modal Header -->
+            <div class="profile-header">
+                <button class="profile-close" id="closeProfileModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                
+                <div class="profile-info">
+                    <div class="profile-avatar">SC</div>
+                    <div class="profile-details">
+                        <h2 class="profile-name">Sarah Chen</h2>
+                        <p class="profile-title">Senior Frontend Developer at Meta</p>
+                        <span class="new-badge">New</span>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="profile-contact">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div>Email</div>
+                            <div style="font-weight: 500;">sarah.chen@email.com</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div>Phone</div>
+                            <div style="font-weight: 500;">+1 (555) 123-4567</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location & Education -->
+                <div class="profile-location">
+                    <div class="location-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>San Francisco, CA</span>
+                    </div>
+                    <div class="location-item">
+                        <i class="bi bi-mortarboard"></i>
+                        <span>M.S. Computer Science, Stanford</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Score Section -->
+            <div class="modal-ai-section">
+                <div class="modal-ai-header">
+                    <div class="modal-ai-score">
+                        <div class="modal-ai-value">95%</div>
+                        <div class="modal-ai-label">AI Score</div>
+                    </div>
+                    <div>
+                        <h3 class="modal-ai-title">AI Score Breakdown</h3>
+                    </div>
+                </div>
+
+                <div class="score-breakdown">
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">Skills</div>
+                        <div class="breakdown-value skills">98%</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">Experience</div>
+                        <div class="breakdown-value experience">94%</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">Education</div>
+                        <div class="breakdown-value education">92%</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">Cultural</div>
+                        <div class="breakdown-value cultural">96%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Section -->
+            <div class="modal-skills">
+                <h3 class="modal-section-title">Skills</h3>
+                <div class="modal-skills-grid">
+                    <div class="modal-skill-tag">React</div>
+                    <div class="modal-skill-tag">TypeScript</div>
+                    <div class="modal-skill-tag">Node.js</div>
+                    <div class="modal-skill-tag">GraphQL</div>
+                    <div class="modal-skill-tag">AWS</div>
+                </div>
+            </div>
+
+            <!-- Action Buttons - Updated (removed shortlist, added email) -->
+            <div class="modal-actions">
+                <button class="modal-btn resume" onclick="downloadResume()">
+                    <i class="bi bi-download"></i>
+                    Download Resume
+                </button>
+                <button class="modal-btn interview" onclick="scheduleInterview()">
+                    <i class="bi bi-calendar-check"></i>
+                    Schedule Interview
+                </button>
+                <button class="modal-btn email" onclick="emailCandidate('Sarah Chen')">
+                    <i class="bi bi-envelope"></i>
+                    Email Candidate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Profile Modal Functionality
+        const profileModal = document.getElementById('profileModal');
+        const viewProfileBtn = document.querySelector('.view-profile-btn');
+        const closeProfileModal = document.getElementById('closeProfileModal');
+
+        viewProfileBtn.addEventListener('click', () => {
+            profileModal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
+        });
+
+        closeProfileModal.addEventListener('click', () => {
+            profileModal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        // Close modal when clicking outside
+        profileModal.addEventListener('click', (e) => {
+            if (e.target === profileModal) {
+                profileModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Email Candidate Function
+        function emailCandidate(candidateName) {
+            const emailAddress = candidateName === 'Sarah Chen' ? 'sarah.chen@email.com' : 'emily.rodriguez@email.com';
+            const subject = encodeURIComponent(`Follow-up: Senior Frontend Developer Position at Your Company`);
+            const body = encodeURIComponent(`Dear ${candidateName},\n\nThank you for your application for the Senior Frontend Developer position. We would like to discuss your application further.\n\nBest regards,\nHiring Team`);
+            
+            window.location.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
+        }
+
+        // Export Applicants Function
+        function exportApplicants() {
+            alert('Exporting all applicant data as CSV...');
+            // In a real application, this would trigger a download
+            // For demo purposes, we'll just show an alert
+        }
+
+        // Download Resume Function
+        function downloadResume() {
+            alert('Downloading resume for Sarah Chen...');
+            // In a real application, this would trigger a file download
+        }
+
+        // Schedule Interview Function
+        function scheduleInterview() {
+            alert('Opening schedule to book interview with Sarah Chen...');
+            // In a real application, this would open a calendar/scheduling interface
+        }
+
+        // Manage Applicants Button Functionality
+        const manageApplicantsBtn = document.getElementById('manageApplicantsBtn');
+        
+        function handleManageApplicants() {
+            alert('Opening applicant management dashboard...');
+            // In a real application, this would navigate to a detailed management view
+        }
+        
+        if (manageApplicantsBtn) {
+            manageApplicantsBtn.addEventListener('click', handleManageApplicants);
+        }
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const applicantCards = document.querySelectorAll('.applicant-card-container, .minimal-applicant');
+            
+            applicantCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(searchTerm) || searchTerm === '') {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Skill tag dropdown
+        const moreSkillsBtn = document.querySelector('.skill-tag.more');
+        moreSkillsBtn.addEventListener('click', function() {
+            alert('Showing additional skills: Next.js, Redux, Jest');
+        });
+
+        // Resume button in main card
+        document.querySelector('.btn-action.primary').addEventListener('click', function() {
+            alert('Opening resume for Sarah Chen');
+        });
+    </script>
+</body>
+</html>

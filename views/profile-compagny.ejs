@@ -1,0 +1,864 @@
+<%- include('partials/header', { title: 'TechCorp - Nexus' }) %>
+
+<div class="profile-page">
+    <div class="profile-container">
+        <!-- Company Header with Background -->
+        <div class="profile-header-bg">
+            <!-- Header Action Buttons -->
+            <div class="profile-header-actions">
+                <button class="header-action-btn" title="Edit Company Profile" onclick="openEditForm('company')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="header-action-btn" title="Share Company">
+                    <i class="bi bi-share"></i>
+                </button>
+                <button class="header-action-btn" title="Post a Job">
+                    <i class="bi bi-briefcase-plus"></i>
+                </button>
+            </div>
+            
+            <div class="profile-header-content">
+                <!-- Company Logo with Upload Overlay -->
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar-large">
+                        TC
+                    </div>
+                    <div class="avatar-upload-overlay" onclick="openUploadPhoto()">
+                        <i class="bi bi-camera-fill me-2"></i>
+                        Change Logo
+                    </div>
+                </div>
+                
+                <div class="profile-main-info">
+                    <h1>TechCorp</h1>
+                    <p class="profile-title">Technology • Software Development • SaaS</p>
+                    <div class="profile-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>San Francisco, CA • New York, NY • Remote</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-people"></i>
+                            <span>1,000+ employees</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-building"></i>
+                            <span>Founded 2015</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two Column Content -->
+        <div class="profile-content">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- About Company -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-buildings"></i>
+                        </div>
+                        <h3 class="section-title">About TechCorp</h3>
+                        <div class="section-actions">
+                            <button class="action-btn edit" title="Edit About" onclick="openEditForm('about')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="about-text">
+                        <p>TechCorp is a leading technology company specializing in innovative software solutions and SaaS products. We're on a mission to revolutionize how businesses operate through cutting-edge technology and user-centric design.</p>
+                        <p>With over 1,000 employees across 3 continents, we've helped 5,000+ companies streamline their operations and boost productivity by an average of 40%.</p>
+                        <p>Our culture is built on innovation, collaboration, and continuous learning. We believe in empowering our employees to do their best work in a supportive, inclusive environment.</p>
+                    </div>
+                </section>
+
+                <!-- Active Jobs -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <h3 class="section-title">Active Job Openings</h3>
+                        <div class="section-actions">
+                            <button class="action-btn add" title="Post New Job" onclick="openEditForm('job', 'add')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="experience-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit Job" onclick="openEditForm('job', '1')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete Job">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="experience-title">Senior Product Designer</h4>
+                        <div class="experience-company">Design Team • Full-time</div>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-geo-alt"></i> San Francisco, CA or Remote</span>
+                            <span><i class="bi bi-cash"></i> $140,000 - $180,000</span>
+                        </div>
+                        <p class="experience-description">Looking for an experienced designer to lead our design system and create intuitive user experiences. 5+ years experience required.</p>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-clock"></i> Posted 2 days ago</span>
+                            <span><i class="bi bi-people"></i> 45 applicants</span>
+                        </div>
+                    </div>
+                    <div class="experience-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit Job" onclick="openEditForm('job', '2')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete Job">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="experience-title">Software Engineer (Frontend)</h4>
+                        <div class="experience-company">Engineering Team • Full-time</div>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-geo-alt"></i> Remote</span>
+                            <span><i class="bi bi-cash"></i> $120,000 - $160,000</span>
+                        </div>
+                        <p class="experience-description">Build responsive web applications using React and TypeScript. Join our fast-growing engineering team.</p>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-clock"></i> Posted 1 week ago</span>
+                            <span><i class="bi bi-people"></i> 128 applicants</span>
+                        </div>
+                    </div>
+                    <div class="add-item-section">
+                        <button class="add-item-btn" onclick="openEditForm('job', 'add')">
+                            <i class="bi bi-plus-circle"></i>
+                            Post New Job Opening
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Recent Posts -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-newspaper"></i>
+                        </div>
+                        <h3 class="section-title">Company Updates & Posts</h3>
+                        <div class="section-actions">
+                            <button class="action-btn add" title="Create Post" onclick="openEditForm('post', 'add')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="experience-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit Post" onclick="openEditForm('post', '1')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete Post">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="experience-title">Announcing our Series C Funding!</h4>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-calendar"></i> January 15, 2024</span>
+                            <span><i class="bi bi-eye"></i> 5.2k views</span>
+                        </div>
+                        <p class="experience-description">We're excited to announce that we've raised $50M in Series C funding led by Sequoia Capital! This investment will accelerate our product development and global expansion.</p>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-heart"></i> 342 likes</span>
+                            <span><i class="bi bi-chat"></i> 45 comments</span>
+                        </div>
+                    </div>
+                    <div class="experience-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit Post" onclick="openEditForm('post', '2')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete Post">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="experience-title">TechCorp Named "Best Place to Work 2024"</h4>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-calendar"></i> December 20, 2023</span>
+                            <span><i class="bi bi-eye"></i> 3.8k views</span>
+                        </div>
+                        <p class="experience-description">We're honored to be recognized as one of the best places to work in technology! Thank you to our amazing team for making TechCorp such a special place.</p>
+                        <div class="experience-meta">
+                            <span><i class="bi bi-heart"></i> 287 likes</span>
+                            <span><i class="bi bi-chat"></i> 32 comments</span>
+                        </div>
+                    </div>
+                    <div class="add-item-section">
+                        <button class="add-item-btn" onclick="openEditForm('post', 'add')">
+                            <i class="bi bi-plus-circle"></i>
+                            Create Company Post
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Company Stats -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+                        <h3 class="section-title">Company Statistics</h3>
+                    </div>
+                    <div class="skills-grid">
+                        <div class="skill-tag">
+                            <strong>1,000+</strong>
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <br>Employees
+                        </div>
+                        <div class="skill-tag">
+                            <strong>5,000+</strong>
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <br>Clients
+                        </div>
+                        <div class="skill-tag">
+                            <strong>15</strong>
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <br>Countries
+                        </div>
+                        <div class="skill-tag">
+                            <strong>2015</strong>
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <br>Founded
+                        </div>
+                        <div class="skill-tag">
+                            <strong>12</strong>
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <br>Open Positions
+                        </div>
+                        <div class="skill-tag">
+                            <strong>$150M</strong>
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <br>Funding
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Contact & Info -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <h3 class="section-title">Contact Information</h3>
+                        <div class="section-actions">
+                            <button class="action-btn edit" title="Edit Contact Info" onclick="openEditForm('contact')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="contact-list">
+                        <div class="contact-item">
+                            <div class="contact-actions">
+                                <button class="item-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <div class="contact-icon">
+                                <i class="bi bi-globe"></i>
+                            </div>
+                            <span>www.techcorp.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-actions">
+                                <button class="item-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <div class="contact-icon">
+                                <i class="bi bi-envelope"></i>
+                            </div>
+                            <span>careers@techcorp.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-actions">
+                                <button class="item-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <div class="contact-icon">
+                                <i class="bi bi-telephone"></i>
+                            </div>
+                            <span>+1 (555) 987-6543</span>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-actions">
+                                <button class="item-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <div class="contact-icon">
+                                <i class="bi bi-linkedin"></i>
+                            </div>
+                            <span>linkedin.com/company/techcorp</span>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-actions">
+                                <button class="item-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            <div class="contact-icon">
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+                            <span>123 Tech Street, San Francisco, CA 94107</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Company Departments -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-diagram-3"></i>
+                        </div>
+                        <h3 class="section-title">Departments & Teams</h3>
+                        <div class="section-actions">
+                            <button class="action-btn add" title="Add Department" onclick="openEditForm('department', 'add')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="skills-grid">
+                        <div class="skill-tag">
+                            Engineering
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Product
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Design
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Marketing
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Sales
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            HR & Talent
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="skill-btn delete" title="Delete">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="add-item-section">
+                        <div class="skill-input-container">
+                            <input type="text" class="form-input skill-input" placeholder="Add new department...">
+                            <button class="add-skill-btn">Add</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Company Culture -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-emoji-smile"></i>
+                        </div>
+                        <h3 class="section-title">Company Culture</h3>
+                        <div class="section-actions">
+                            <button class="action-btn edit" title="Edit Culture" onclick="openEditForm('culture')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="skills-grid">
+                        <div class="skill-tag">
+                            Innovation
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Collaboration
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Growth Mindset
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Work-Life Balance
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Diversity & Inclusion
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tag">
+                            Remote-Friendly
+                            <div class="skill-actions">
+                                <button class="skill-btn edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Company Benefits -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-gift"></i>
+                        </div>
+                        <h3 class="section-title">Employee Benefits</h3>
+                        <div class="section-actions">
+                            <button class="action-btn add" title="Add Benefit" onclick="openEditForm('benefit', 'add')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="certification-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="cert-name">Health & Wellness</h4>
+                        <div class="cert-description">
+                            Comprehensive medical, dental, and vision insurance. Mental health support and wellness programs.
+                        </div>
+                    </div>
+                    <div class="certification-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="cert-name">Flexible Work</h4>
+                        <div class="cert-description">
+                            Remote work options, flexible hours, and unlimited PTO to support work-life balance.
+                        </div>
+                    </div>
+                    <div class="certification-item">
+                        <div class="item-actions">
+                            <button class="item-btn edit" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="item-btn delete" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="cert-name">Learning & Development</h4>
+                        <div class="cert-description">
+                            $2,000 annual learning budget, conference attendance, and internal training programs.
+                        </div>
+                    </div>
+                    <div class="add-item-section">
+                        <button class="add-item-btn" onclick="openEditForm('benefit', 'add')">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Employee Benefit
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Logo Modal (same as before, just with company context) -->
+<div class="edit-form-overlay" id="uploadPhotoModal">
+    <div class="edit-form-container">
+        <div class="upload-modal-content">
+            <div class="edit-form-header">
+                <h3 class="edit-form-title">Upload Company Logo</h3>
+                <button class="close-form-btn" onclick="closeUploadPhoto()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                </div>
+                <p class="upload-text">Click to upload or drag and drop</p>
+                <p class="upload-hint">PNG, JPG or GIF (Max 5MB)</p>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="previewImage(this)">
+            </div>
+            <img id="imagePreview" class="upload-preview" src="" alt="Preview">
+            <div class="upload-actions">
+                <button class="btn-upload" onclick="uploadPhoto()">Upload Logo</button>
+                <button class="btn-remove" onclick="removePhoto()">Remove Current</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Form Modal (same as before, but with company-specific forms) -->
+<div class="edit-form-overlay" id="editFormModal">
+    <div class="edit-form-container">
+        <div class="edit-form-header">
+            <h3 class="edit-form-title" id="editFormTitle">Edit Company Profile</h3>
+            <button class="close-form-btn" onclick="closeEditForm()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <form id="editProfileForm">
+            <div id="formContent">
+                <!-- Dynamic form content will be inserted here -->
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Save Changes</button>
+                <button type="button" class="btn-cancel" onclick="closeEditForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+// Same modal functions as before, but with company-specific forms
+function openUploadPhoto() {
+    document.getElementById('uploadPhotoModal').classList.add('active');
+}
+
+function closeUploadPhoto() {
+    document.getElementById('uploadPhotoModal').classList.remove('active');
+    document.getElementById('imagePreview').classList.remove('active');
+    document.getElementById('imagePreview').src = '';
+}
+
+function openEditForm(type, id = '') {
+    const modal = document.getElementById('editFormModal');
+    const title = document.getElementById('editFormTitle');
+    const formContent = document.getElementById('formContent');
+    
+    let formHTML = '';
+    
+    switch(type) {
+        case 'company':
+            title.textContent = 'Edit Company Profile';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" class="form-input" value="TechCorp" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Industry</label>
+                    <input type="text" class="form-input" value="Technology • Software Development • SaaS">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Headquarters</label>
+                    <input type="text" class="form-input" value="San Francisco, CA">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company Size</label>
+                    <input type="text" class="form-input" value="1,000+ employees">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Founded</label>
+                    <input type="number" class="form-input" value="2015">
+                </div>
+            `;
+            break;
+            
+        case 'about':
+            title.textContent = 'Edit Company Description';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Company Description</label>
+                    <textarea class="form-input form-textarea">TechCorp is a leading technology company specializing in innovative software solutions and SaaS products. We're on a mission to revolutionize how businesses operate through cutting-edge technology and user-centric design.
+
+With over 1,000 employees across 3 continents, we've helped 5,000+ companies streamline their operations and boost productivity by an average of 40%.
+
+Our culture is built on innovation, collaboration, and continuous learning. We believe in empowering our employees to do their best work in a supportive, inclusive environment.</textarea>
+                </div>
+            `;
+            break;
+            
+        case 'job':
+            title.textContent = id === 'add' ? 'Post New Job' : 'Edit Job Opening';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Job Title</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Senior Product Designer'}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Design Team'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Employment Type</label>
+                    <select class="form-input">
+                        <option>Full-time</option>
+                        <option>Part-time</option>
+                        <option>Contract</option>
+                        <option>Internship</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'San Francisco, CA or Remote'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Salary Range</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : '$140,000 - $180,000'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Job Description</label>
+                    <textarea class="form-input form-textarea">${id === 'add' ? '' : 'Looking for an experienced designer to lead our design system and create intuitive user experiences. 5+ years experience required.'}</textarea>
+                </div>
+            `;
+            break;
+            
+        case 'post':
+            title.textContent = id === 'add' ? 'Create Company Post' : 'Edit Company Post';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Post Title</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Announcing our Series C Funding!'}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Post Content</label>
+                    <textarea class="form-input form-textarea">${id === 'add' ? '' : 'We\'re excited to announce that we\'ve raised $50M in Series C funding led by Sequoia Capital! This investment will accelerate our product development and global expansion.'}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Post Date</label>
+                    <input type="date" class="form-input" value="${id === 'add' ? '' : '2024-01-15'}">
+                </div>
+            `;
+            break;
+            
+        case 'contact':
+            title.textContent = 'Edit Contact Information';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Website</label>
+                    <input type="url" class="form-input" value="www.techcorp.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" value="careers@techcorp.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" value="+1 (555) 987-6543">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">LinkedIn</label>
+                    <input type="url" class="form-input" value="linkedin.com/company/techcorp">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <textarea class="form-input form-textarea">123 Tech Street, San Francisco, CA 94107</textarea>
+                </div>
+            `;
+            break;
+            
+        case 'culture':
+            title.textContent = 'Edit Company Culture';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Culture Values</label>
+                    <textarea class="form-input form-textarea" placeholder="Enter culture values, one per line">Innovation
+Collaboration
+Growth Mindset
+Work-Life Balance
+Diversity & Inclusion
+Remote-Friendly</textarea>
+                </div>
+            `;
+            break;
+            
+        case 'benefit':
+            title.textContent = id === 'add' ? 'Add Employee Benefit' : 'Edit Employee Benefit';
+            formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Benefit Name</label>
+                    <input type="text" class="form-input" value="${id === 'add' ? '' : 'Health & Wellness'}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Benefit Description</label>
+                    <textarea class="form-input form-textarea">${id === 'add' ? '' : 'Comprehensive medical, dental, and vision insurance. Mental health support and wellness programs.'}</textarea>
+                </div>
+            `;
+            break;
+    }
+    
+    formContent.innerHTML = formHTML;
+    modal.classList.add('active');
+}
+
+function closeEditForm() {
+    document.getElementById('editFormModal').classList.remove('active');
+}
+
+// Same image upload functions
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.add('active');
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function uploadPhoto() {
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput.files.length > 0) {
+        alert('Company logo uploaded successfully!');
+        closeUploadPhoto();
+    } else {
+        alert('Please select a logo first.');
+    }
+}
+
+function removePhoto() {
+    if (confirm('Are you sure you want to remove your company logo?')) {
+        alert('Company logo removed.');
+        closeUploadPhoto();
+    }
+}
+
+// Form submission
+document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Changes saved successfully!');
+    closeEditForm();
+});
+
+// Close modals when clicking outside
+document.querySelectorAll('.edit-form-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+});
+
+// Add department functionality
+document.querySelector('.add-skill-btn').addEventListener('click', function() {
+    const input = document.querySelector('.skill-input');
+    const departmentName = input.value.trim();
+    
+    if (departmentName) {
+        const skillsGrid = document.querySelector('.skills-grid');
+        const newSkill = document.createElement('div');
+        newSkill.className = 'skill-tag';
+        newSkill.innerHTML = `
+            ${departmentName}
+            <div class="skill-actions">
+                <button class="skill-btn edit" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="skill-btn delete" title="Delete">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        `;
+        skillsGrid.appendChild(newSkill);
+        input.value = '';
+        
+        newSkill.querySelector('.skill-btn.delete').addEventListener('click', function() {
+            newSkill.remove();
+        });
+    }
+});
+</script>
