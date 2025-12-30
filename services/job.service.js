@@ -2,7 +2,6 @@ const JobOffer = require('../models/joboffer.model');
 const User = require('../models/User.model');
 const messageService = require('./message.service');
 const notificationService = require('./notification.service');
-
 // --- HELPER: Extraction de mots-clés améliorée ---
 const extractKeywords = (text) => {
     if (!text) return [];
@@ -15,8 +14,15 @@ const extractKeywords = (text) => {
 
 // --- LOGIQUE MÉTIER ---
 
-exports.createJob = async (companyId, data) => {
-    return JobOffer.create({ ...data, companyId });
+// exports.createJob = async (companyId, data) => {
+//     return JobOffer.create({ ...data, companyId });
+// };
+
+
+exports.createJob = async (jobData) => {
+    // jobData contient déjà title, location, companyId, etc.
+    const newJob = new JobOffer(jobData); 
+    return await newJob.save();
 };
 
 exports.getAllJobs = async (filters = {}) => {
@@ -103,6 +109,12 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
     );
 
     return job;
+};
+
+exports.getUserApplications = async (userId) => {
+    // Cherche tous les jobs où l'utilisateur apparaît dans la liste des candidats
+    return await JobOffer.find({ "applicants.userId": userId })
+        .populate('companyId', 'firstName lastName avatar');
 };
 
 exports.closeJob = async (jobId, companyId) => {

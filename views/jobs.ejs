@@ -1,0 +1,70 @@
+<div class="row g-4">
+    <div class="col-lg-3">
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Search Filters</h6>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" id="job-search" class="form-control border-start-0" placeholder="Title or location...">
+                </div>
+                <hr>
+                <button class="btn btn-primary btn-sm w-100 mb-2" onclick="location.href='/jobs/create'">
+                    <i class="bi bi-plus-lg"></i> Post a Job
+                </button>
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="location.href='/applications/me'">
+                    <i class="bi bi-file-earmark-person"></i> My Applications
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 d-none" id="skill-gap-card">
+            <div class="card-body">
+                <h6 class="fw-bold small"><i class="bi bi-cpu text-primary"></i> Skill Analysis</h6>
+                <div id="skill-analysis-list" class="mt-2">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div id="jobs-container">
+            <div class="text-center py-5" id="jobs-loading">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Finding the best opportunities...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="applyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="apply-form" class="modal-content border-0 shadow" method="POST">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Apply for <span id="modal-job-title" class="text-primary"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modal-job-id">
+                
+                <div class="alert alert-info py-2 small mb-3">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Our AI will calculate your match score based on your profile.
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Resume Link (PDF/Drive)</label>
+                    <input type="text" class="form-control" id="resumeUrl" placeholder="https://..." required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Cover Letter / Note (Optional)</label>
+                    <textarea class="form-control" id="applicationNote" rows="3" placeholder="Tell the company why you're a good fit..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary px-4 shadow-sm">Send Application</button>
+            </div>
+        </form>
+    </div>
+</div>

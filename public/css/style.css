@@ -1,0 +1,16 @@
+:root {
+    --linkedin-blue: #0a66c2;
+    --linkedin-light: #f3f2ef;
+}
+
+body { background-color: var(--linkedin-light); font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.navbar { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.nav-link { color: #666; font-size: 0.85rem; }
+.nav-link:hover { color: #000; }
+.card { border-radius: 8px; border: 1px solid #e0e0e0; }
+.job-card:hover { border-color: #0a66c2; cursor: pointer; }
+
+/* Chat Bubbles */
+.message-bubble { max-width: 75%; padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; }
+.msg-sent { background: #d9e4ff; align-self: flex-end; border-bottom-right-radius: 2px; }
+.msg-received { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #eee; }

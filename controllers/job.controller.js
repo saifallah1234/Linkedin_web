@@ -22,7 +22,15 @@ exports.getJobById = async (req, res) => {
 };
 
 // --- APPLICANT ACTIONS ---
-
+exports.getUserApplications = async (req, res) => {
+    try {
+        // req.user.id vient de votre mockAuth
+        const applications = await jobService.getUserApplications(req.user.id);
+        res.json(applications);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 exports.applyToJob = async (req, res) => {
   try {
     const resumeFile = req.files?.resume?.[0];
@@ -57,15 +65,34 @@ exports.applyToJob = async (req, res) => {
 
 // --- COMPANY ACTIONS ---
 
-exports.createJob = async (req, res) => {
-  try {
-    const job = await jobService.createJob( req.user.id,req.body);
-    res.status(201).json(job);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
+// exports.createJob = async (req, res) => {
+//   try {
+//     const job = await jobService.createJob( req.user.id,req.body);
+//     res.status(201).json(job);
+//   } catch (err) {
+//     res.status(400).json({ message: err.message });
+//   }
+// };
+// Dans controllers/job.controller.js
 
+exports.createJob = async (req, res) => {
+    // Étape de diagnostic : Regardez votre terminal après avoir cliqué
+    console.log("Données brutes reçues (req.body):", req.body);
+
+    try {
+        // On prépare un objet UNIQUE qui contient tout
+        const jobData = {
+            ...req.body,           // Fusionne title, location, type, etc.
+            companyId: req.user.id // Ajoute l'ID du mockAuth
+        };
+
+        const job = await jobService.createJob(jobData);
+        res.status(201).json(job);
+    } catch (err) {
+        console.error("Erreur de validation complète:", err.errors);
+        res.status(400).json({ message: err.message });
+    }
+};
 exports.closeJob = async (req, res) => {
   try {
     // req.user.id is passed to ensure only the owner can close it

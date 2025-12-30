@@ -14,6 +14,7 @@ router.post('/:id/apply', mockAuth, upload.fields([
   { name: 'resume', maxCount: 1 },
   { name: 'additionalAttachment', maxCount: 1 }
 ]), jobCtrl.applyToJob);
+router.get('/my-applications', mockAuth, jobCtrl.getUserApplications);
 
 // Company Routes
 router.post('/', mockAuth, jobCtrl.createJob);

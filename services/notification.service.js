@@ -23,13 +23,26 @@ exports.createNotification = async (receiver, sender, type, entity) => {
 };
 
 exports.getUserNotifications = async (userId, userRole) => {
-  return await Notification.find({
-    'receiver.id': userId,
-    'receiver.type': userRole
-  })
+  try {
+    return await Notification.find({
+      'receiver.id': userId,
+      'receiver.type': userRole
+    })
     .sort({ createdAt: -1 })
-    .populate('sender.id', 'name logo avatar')
-    .populate('entity.id');
+    .populate({
+      path: 'sender.id',
+      select: 'firstName lastName name logo avatar'
+    })
+    .populate({
+      path: 'entity.id',
+      // On force Mongoose à regarder dans JobOffer si le type est lié à un job
+      model: 'JobOffer', 
+      strictPopulate: false 
+    });
+  } catch (error) {
+    console.error("Erreur Notifications:", error.message);
+    return []; // Retourne un tableau vide au lieu de faire planter le serveur
+  }
 };
 exports.getUnreadCount = async (userId) => {
   return await Notification.countDocuments({ 'receiver.id': userId, isRead: false });

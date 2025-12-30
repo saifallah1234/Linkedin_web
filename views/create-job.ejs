@@ -1,0 +1,61 @@
+<div class="card shadow-sm border-0 max-width-700 mx-auto">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-4">Post a New Job</h5>
+        <form id="create-job-form" action="/api/jobs" method="POST">
+            <div class="mb-3">
+                <label class="form-label">Job Title</label>
+                <input type="text" class="form-control" name="title" placeholder="ex: Senior Fullstack Engineer" required>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-control" name="location" placeholder="Paris, Remote..." required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" name="category">
+                        <option value="IT">IT & Tech</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Finance">Finance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Job Type</label>
+                    <select class="form-select" name="type" required>
+                        <option value="full-time">Full-time</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="internship">Internship</option>
+                        <option value="freelance">Freelance</option>
+                        <option value="contract">Contract</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Salary Range</label>
+                    <input type="text" class="form-control" name="salaryRange" placeholder="ex: 45k - 55k €" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-control" name="startDate">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Application Deadline</label>
+                    <input type="date" class="form-control" name="deadline">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description & Requirements</label>
+                <textarea class="form-control" name="description" rows="5" placeholder="Describe the role and the skills needed..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Post Job</button>
+        </form>
+    </div>
+</div>
