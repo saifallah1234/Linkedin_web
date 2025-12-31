@@ -80,4 +80,4 @@ const jobOfferSchema = new mongoose.Schema({
 
 jobOfferSchema.index({ location: 1, type: 1 });
 
-module.exports = mongoose.model('JobOffer', jobOfferSchema);
+module.exports = mongoose.models.JobOffer || mongoose.model('JobOffer', jobOfferSchema);

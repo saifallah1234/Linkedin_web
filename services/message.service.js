@@ -1,4 +1,4 @@
-const Message = require('../models/Message.model');
+const Message = require('../models/message.model');
 const Notification = require('../models/Notification.model');
 
 // Send a message
@@ -75,4 +75,14 @@ exports.getConversations = async (userId) => {
         { $sort: { "lastMessage.createdAt": -1 } }
     ]);
     // Note: You can add a $lookup stage here to populate user details (name, avatar)
+};
+
+// Delete a whole conversation between two users
+exports.deleteConversation = async (userId, otherUserId) => {
+    return await Message.deleteMany({
+        $or: [
+            { senderId: userId, receiverId: otherUserId },
+            { senderId: otherUserId, receiverId: userId }
+        ]
+    });
 };

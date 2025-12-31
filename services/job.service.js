@@ -1,5 +1,7 @@
-const JobOffer = require('../models/joboffer.model');
-const Message = require('../models/Message.model');
+const JobOffer = require('../models//JobOffer.model');
+const Message = require('../models/message.model');
+const User = require('../models/User.model');
+const { generateApplicantScore, updateAllApplicantScores } = require('../utils/aiScoring');
 
 // Fix: Correct argument order (companyId first)
 exports.createJob = async (companyId, data) => {
@@ -9,11 +11,19 @@ exports.createJob = async (companyId, data) => {
 exports.getAllJobs = async (filters = {}) => {
   let query = { isActive: true };
   if (filters.location) query.location = new RegExp(filters.location, 'i');
-  return JobOffer.find(query).sort({ createdAt: -1 }).populate('companyId', 'firstName lastName avatar');
+  if (filters.type) query.type = filters.type;
+  if (filters.experienceLevel) query.experienceLevel = filters.experienceLevel;
+  
+  return JobOffer.find(query)
+    .sort({ createdAt: -1 })
+    .populate('companyId', 'name logo location website')
+    .lean();
 };
 
 exports.getJobById = async (jobId) => {
-  return await JobOffer.findById(jobId).populate('companyId', 'firstName lastName email bio');
+  return await JobOffer.findById(jobId)
+    .populate('companyId', 'name logo location website description')
+    .populate('applicants.userId', 'firstName lastName image headline location');
 };
 
 exports.applyToJob = async (jobId, userId, applicationData) => {
@@ -21,23 +31,60 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
   if (!job || !job.isActive) throw new Error('Job not found or closed');
 
   const alreadyApplied = job.applicants.some(a => a.userId.toString() === userId);
-  if (alreadyApplied) throw new Error('Already applied');
+  if (alreadyApplied) throw new Error('Already applied to this job');
 
+  // Get user profile for AI scoring
+  const user = await User.findById(userId)
+    .select('firstName lastName headline location about experiences skills education projects certificates')
+    .lean();
+
+  if (!user) throw new Error('User not found');
+
+  // Prepare job details for AI
+  const jobDetails = {
+    title: job.title,
+    description: job.description,
+    requirements: job.requirements || '',
+    skillsRequired: job.skillsRequired || [],
+    experienceLevel: job.experienceLevel || 'mid',
+    type: job.type,
+    location: job.location,
+    companyName: 'Unknown Company' // Will be populated if needed
+  };
+
+  // Generate AI score
+  let aiScore = 0;
+  let aiFeedback = '';
+  let matchPercentage = 0;
+  
+  try {
+    const aiEvaluation = await generateApplicantScore(user, jobDetails);
+    aiScore = aiEvaluation.score;
+    aiFeedback = aiEvaluation.feedback || '';
+    matchPercentage = aiEvaluation.matchPercentage || aiScore;
+  } catch (aiError) {
+    console.error('AI scoring failed, using fallback:', aiError);
+    // Use fallback scoring
+    const { calculateFallbackScore } = require('../utils/aiScoring');
+    aiScore = calculateFallbackScore(user, jobDetails);
+    matchPercentage = aiScore;
+    aiFeedback = 'AI evaluation temporarily unavailable. Score based on profile matching.';
+  }
+
+  // Add applicant with AI score
   job.applicants.push({
     userId,
     resumeUrl: applicationData.resumeUrl,
-    additionalAttachment: applicationData.additionalAttachment
+    additionalAttachment: applicationData.additionalAttachment,
+    score: aiScore,
+    matchPercentage: matchPercentage,
+    aiFeedback: aiFeedback,
+    appliedAt: new Date()
   });
 
   await job.save();
 
-  // PROJET REQUIREMENT: Open a discussion
-  await Message.create({
-    sender: userId,
-    receiver: job.companyId,
-    content: `Hello, I've just applied for the "${job.title}" position. I'm looking forward to your feedback!`
-  });
-
+ 
   return job;
 };
 
@@ -47,4 +94,55 @@ exports.updateApplicantStatus = async (jobId, applicantId, status) => {
     { $set: { "applicants.$.status": status } },
     { new: true }
   );
+};
+
+// New function: Get top candidates for a job
+exports.getTopCandidates = async (jobId, limit = 10) => {
+  const job = await JobOffer.findById(jobId)
+    .populate({
+      path: 'applicants.userId',
+      select: 'firstName lastName image headline location experiences skills'
+    })
+    .lean();
+
+  if (!job || !job.applicants) return [];
+
+  // Sort applicants by score (highest first)
+  const sortedApplicants = [...job.applicants]
+    .filter(app => app.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+
+  return sortedApplicants;
+};
+
+// New function: Re-score all applicants for a job
+exports.rescoreApplicants = async (jobId) => {
+  const result = await updateAllApplicantScores(jobId);
+  return result;
+};
+
+// New function: Get job statistics
+exports.getJobStatistics = async (jobId) => {
+  const job = await JobOffer.findById(jobId).lean();
+  
+  if (!job) return null;
+  
+  const applicants = job.applicants || [];
+  const scores = applicants.map(app => app.score).filter(score => score > 0);
+  
+  return {
+    totalApplications: applicants.length,
+    scoredApplications: scores.length,
+    averageScore: scores.length > 0 
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : 0,
+    highestScore: scores.length > 0 ? Math.max(...scores) : 0,
+    lowestScore: scores.length > 0 ? Math.min(...scores) : 0,
+    statusDistribution: {
+      pending: applicants.filter(app => app.status === 'pending').length,
+      accepted: applicants.filter(app => app.status === 'accepted').length,
+      rejected: applicants.filter(app => app.status === 'rejected').length
+    }
+  };
 };

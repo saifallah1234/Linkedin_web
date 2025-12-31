@@ -23,9 +23,9 @@ app.get("/", (req, res) => {
 });
 
 app.use('/', auth);
-app.use('/user', usersRoute);
+app.use('/api/users', usersRoute);
 app.use('/connection', connection);
-app.use('/company', company);
+app.use('/api/companies', company);
 app.use('/api/posts', postRoutes);
 
 app.use('/api/jobs', require('./routes/job.routes'));

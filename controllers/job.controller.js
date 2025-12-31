@@ -4,7 +4,6 @@ const jobService = require('../services/job.service');
 
 exports.getAllJobs = async (req, res) => {
   try {
-    // Passes query params (like location or type) to the service for filtering
     const jobs = await jobService.getAllJobs(req.query);
     res.status(200).json(jobs);
   } catch (err) {
@@ -32,7 +31,6 @@ exports.applyToJob = async (req, res) => {
     let attachmentData = undefined;
 
     if (attachmentFile) {
-      // Normalize path to use forward slashes for URL compatibility
       const normalizedPath = attachmentFile.path.replace(/\\/g, "/");
 
       attachmentData = {
@@ -43,13 +41,18 @@ exports.applyToJob = async (req, res) => {
     }
 
     const applicationData = { 
-        resumeUrl: resumeFile.path.replace(/\\/g, "/"), 
-        additionalAttachment: attachmentData 
+      resumeUrl: resumeFile.path.replace(/\\/g, "/"), 
+      additionalAttachment: attachmentData 
     };
 
-    await jobService.applyToJob(req.params.id, req.user.id, applicationData);
+    const job = await jobService.applyToJob(req.params.id, req.user.id, applicationData);
 
-    res.status(201).json({ message: 'Application submitted and discussion opened' });
+    res.status(201).json({ 
+      message: 'Application submitted successfully',
+      applicationId: job.applicants[job.applicants.length - 1]._id,
+      aiScore: job.applicants[job.applicants.length - 1].score,
+      matchPercentage: job.applicants[job.applicants.length - 1].matchPercentage
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -59,7 +62,7 @@ exports.applyToJob = async (req, res) => {
 
 exports.createJob = async (req, res) => {
   try {
-    const job = await jobService.createJob( req.user.id,req.body);
+    const job = await jobService.createJob(req.user.id, req.body);
     res.status(201).json(job);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -68,7 +71,6 @@ exports.createJob = async (req, res) => {
 
 exports.closeJob = async (req, res) => {
   try {
-    // req.user.id is passed to ensure only the owner can close it
     const job = await jobService.closeJob(req.params.id, req.user.id);
     res.status(200).json({ message: "Job closed successfully", job });
   } catch (err) {
@@ -78,12 +80,52 @@ exports.closeJob = async (req, res) => {
 
 exports.updateApplicantStatus = async (req, res) => {
   try {
-    const { id, userId } = req.params; // id = jobId, userId = applicantId
+    const { id, userId } = req.params;
     const { status } = req.body;
 
     const updatedJob = await jobService.updateApplicantStatus(id, userId, status);
     res.status(200).json(updatedJob);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+};
+
+// --- NEW AI SCORING ENDPOINTS ---
+
+exports.getTopCandidates = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    
+    const candidates = await jobService.getTopCandidates(id, limit);
+    res.status(200).json(candidates);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.rescoreApplicants = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await jobService.rescoreApplicants(id);
+    res.status(200).json({
+      message: 'Applicants rescored successfully',
+      updated: result.updated,
+      failed: result.failed
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getJobStatistics = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const statistics = await jobService.getJobStatistics(id);
+    res.status(200).json(statistics);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };

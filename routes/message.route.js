@@ -149,4 +149,27 @@ router.post(
   messageCtrl.send
 );
 
+/**
+ * @swagger
+ * /api/messages/{userId}:
+ *   delete:
+ *     summary: Delete entire conversation with a user
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user whose conversation to delete
+ *     responses:
+ *       200:
+ *         description: Conversation deleted successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete('/:userId', messageCtrl.deleteConversation);
+
 module.exports = router;

@@ -199,3 +199,6 @@ npm install express
 npm install morgan mongoose bcryptjs jsonwebtoken express-validator
 npm install swagger-ui-express swagger-jsdoc
 npm install groq-sdk
+npm install ejs
+npm install pdfkit
+

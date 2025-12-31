@@ -43,3 +43,15 @@ exports.getInbox = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+exports.deleteConversation = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const otherUserId = req.params.userId;
+        
+        await messageService.deleteConversation(userId, otherUserId);
+        res.status(200).json({ message: 'Conversation deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
