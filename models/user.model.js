@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs'); // Add bcrypt import
 
 // --- 1. Sub-Schemas (Embedded Objects) ---
 
@@ -51,10 +52,27 @@ const userSchema = new mongoose.Schema({
     lowercase: true, 
     trim: true 
   },
-  password: { type: String, required: true, select: false }, // Hidden by default
+  password: { 
+    type: String, 
+    required: function() {
+      // Only required for non-Google users
+      return !this.googleId;
+    }, 
+    select: false 
+  },
   dateOfBirth: { type: Date },
   image: { type: String, default: '' }, // URL to avatar
   location: { type: String, required: true, trim: true },
+  // --- NEW FIELDS FOR GOOGLE ---
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true // Allows multiple null values
+  },
+  isGoogleUser: {
+    type: Boolean,
+    default: false
+  },
   // --- Embedded Arrays ---
   followingCompanies: [followingCompanySchema],
   education: [educationSchema],
@@ -62,6 +80,21 @@ const userSchema = new mongoose.Schema({
   experiences: [experienceSchema],
   skills: [skillSchema],
   certificates: [certificateSchema],
-  createdAt: { type: Date, default: Date.now }}); // specific createdAt / updatedAt for the User
+  createdAt: { type: Date, default: Date.now }
+});
+
+// --- MODIFIED PASSWORD HASHING MIDDLEWARE ---
+userSchema.pre('save', async function(next) {
+  // Only hash password if it's being modified AND user is NOT a Google user
+  if (this.isModified('password') && this.password && !this.googleId) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    } catch (error) {
+      return next(error);
+    }
+  }
+  next();
+});
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,11 +1,44 @@
 const JobOffer = require('../models//JobOffer.model');
 const Message = require('../models/message.model');
 const User = require('../models/User.model');
+const { generateJobDescription, enhanceJobDescription } = require('../utils/jobDescriptionAI');
 const { generateApplicantScore, updateAllApplicantScores } = require('../utils/aiScoring');
 
 // Fix: Correct argument order (companyId first)
 exports.createJob = async (companyId, data) => {
-  return JobOffer.create({ ...data, companyId });
+  let finalDescription = data.description;
+  const shouldUseAI = data.generateWithAI; // Boolean flag from frontend
+  
+  // If AI generation is requested
+  if (shouldUseAI) {
+    try {
+      if (!data.description || data.description.trim() === "") {
+        // Generate completely new description
+        const aiDescription = await generateJobDescription(data);
+        if (aiDescription) {
+          finalDescription = aiDescription;
+        }
+      } else {
+        // Enhance existing description
+        const enhancedDescription = await enhanceJobDescription(data.description, data);
+        if (enhancedDescription) {
+          finalDescription = enhancedDescription;
+        }
+      }
+    } catch (aiError) {
+      console.error('AI description generation failed:', aiError);
+      // Continue with original description if AI fails
+    }
+  }
+  
+  // Create job with final description
+  return JobOffer.create({ 
+    ...data, 
+    companyId, 
+    description: finalDescription,
+    // Remove the AI flag from the stored data
+    generateWithAI: undefined 
+  });
 };
 
 exports.getAllJobs = async (filters = {}) => {

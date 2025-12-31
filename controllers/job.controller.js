@@ -62,7 +62,16 @@ exports.applyToJob = async (req, res) => {
 
 exports.createJob = async (req, res) => {
   try {
-    const job = await jobService.createJob(req.user.id, req.body);
+    // Extract AI flag from request body
+    const { generateWithAI, ...jobData } = req.body;
+    
+    // Prepare data for service
+    const dataToSend = {
+      ...jobData,
+      generateWithAI: generateWithAI === 'true' || generateWithAI === true
+    };
+    
+    const job = await jobService.createJob(req.user.id, dataToSend);
     res.status(201).json(job);
   } catch (err) {
     res.status(400).json({ message: err.message });

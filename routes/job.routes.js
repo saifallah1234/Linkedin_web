@@ -137,6 +137,7 @@ router.post('/:id/apply', authenticate, isUser, upload.fields([
  *                 type: string
  *               description:
  *                 type: string
+ *                 description: Job description (will be enhanced if generateWithAI is true)
  *               type:
  *                 type: string
  *                 enum: [full-time, part-time, internship, freelance, contract]
@@ -159,9 +160,30 @@ router.post('/:id/apply', authenticate, isUser, upload.fields([
  *               deadline:
  *                 type: string
  *                 format: date
+ *               generateWithAI:
+ *                 type: boolean
+ *                 default: false
+ *                 description: If true, AI will generate/enhance the job description
  *     responses:
  *       201:
  *         description: Job created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 title:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                   description: The generated/enhanced description if AI was used
+ *                 companyId:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
  *       400:
  *         description: Validation error
  *       401:
