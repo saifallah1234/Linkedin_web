@@ -69,7 +69,7 @@ router.post(
     body('lastName').notEmpty().withMessage('Last name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').isLength({ min: 6 }).withMessage('Min 6 chars password'),
-    body('location').notEmpty().withMessage('Location is required')
+    body('location').optional()
   ],
   validate,
   authController.signupUser
@@ -143,6 +143,136 @@ router.post(
   validate,
   authController.checkGoogleSignupAvailability
 );
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Unified login for both users and companies
+ *     tags: [Auth]
+ *     description: Automatically detects if email belongs to a user or company
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                   enum: [User, Company]
+ *                 accountType:
+ *                   type: string
+ *                   enum: [user, company]
+ *                 user:
+ *                   type: object
+ *                   description: Only present when accountType is "user"
+ *                 company:
+ *                   type: object
+ *                   description: Only present when accountType is "company"
+ *       400:
+ *         description: Bad request (missing fields, Google user trying password login, etc.)
+ *       401:
+ *         description: Invalid credentials
+ */
+router.post(
+  '/login',
+  [
+    body('email').isEmail().withMessage('Valid email required'),
+    body('password').notEmpty().withMessage('Password required')
+  ],
+  validate,
+  authController.unifiedLogin
+);
+
+/**
+ * @swagger
+ * /login/google:
+ *   post:
+ *     summary: Unified Google login for users
+ *     tags: [Auth]
+ *     description: Google login that works for both existing and new users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - googleToken
+ *             properties:
+ *               googleToken:
+ *                 type: string
+ *                 description: Google ID token from frontend
+ *     responses:
+ *       200:
+ *         description: Google login successful
+ *       400:
+ *         description: Invalid token or account type mismatch
+ */
+router.post(
+  '/login/google',
+  [
+    body('googleToken').notEmpty().withMessage('Google token is required')
+  ],
+  validate,
+  authController.unifiedGoogleLogin
+);
+
+/**
+ * @swagger
+ * /session:
+ *   get:
+ *     summary: Get current session information
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Session information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 isAuthenticated:
+ *                   type: boolean
+ *                 role:
+ *                   type: string
+ *                   enum: [User, Company]
+ *                 accountType:
+ *                   type: string
+ *                   enum: [user, company]
+ *                 user:
+ *                   type: object
+ *                   description: Only present when accountType is "user"
+ *                 company:
+ *                   type: object
+ *                   description: Only present when accountType is "company"
+ */
+router.get('/session', authController.getCurrentSession);
 /**
  * @swagger
  * /signup/company:

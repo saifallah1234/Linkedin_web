@@ -174,19 +174,29 @@ class CommentService {
     });
 
     if (!comment) return null;
+    // find replies to this comment so we can adjust post.commentsCount correctly
+    const replies = await Comment.find({ parentCommentId: commentId }).select('_id').lean();
+    const numReplies = replies.length;
 
+    // delete the comment itself
     await Comment.findByIdAndDelete(commentId);
 
-    // Decrement comment count on post
-    await Post.findByIdAndUpdate(comment.postId, { $inc: { commentsCount: -1 } });
+    // delete all replies to this comment
+    if (numReplies > 0) {
+      const replyIds = replies.map(r => r._id);
+      await Comment.deleteMany({ parentCommentId: commentId });
+      // delete reactions associated with replies as well
+      await Reaction.deleteMany({ 'target.id': { $in: replyIds }, 'target.type': 'Comment' });
+    }
+
+    // Decrement comment count on post by 1 + number of replies removed
+    const decrement = 1 + numReplies;
+    await Post.findByIdAndUpdate(comment.postId, { $inc: { commentsCount: -decrement } });
 
     // If it's a reply, decrement reply count on parent comment
     if (comment.parentCommentId) {
       await Comment.findByIdAndUpdate(comment.parentCommentId, { $inc: { repliesCount: -1 } });
     }
-
-    // Also delete all replies
-    await Comment.deleteMany({ parentCommentId: commentId });
 
     // Delete all reactions to this comment
     await Reaction.deleteMany({ 'target.id': commentId, 'target.type': 'Comment' });

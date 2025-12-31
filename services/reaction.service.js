@@ -33,9 +33,15 @@ class ReactionService {
       // If same reaction type, remove it (toggle off)
       if (existingReaction.reactionType === reactionType) {
         await Reaction.findByIdAndDelete(existingReaction._id);
+        // decrement likesCount on target synchronously
+        if (modelType === 'Post') {
+          await Post.findByIdAndUpdate(targetId, { $inc: { likesCount: -1 } });
+        } else if (modelType === 'Comment') {
+          await Comment.findByIdAndUpdate(targetId, { $inc: { likesCount: -1 } });
+        }
         return null;
       } else {
-        // Different reaction type, update it
+        // Different reaction type, update it (no change to total count)
         existingReaction.reactionType = reactionType;
         await existingReaction.save();
         return existingReaction;
@@ -52,6 +58,12 @@ class ReactionService {
       });
 
       await reaction.save();
+      // increment likesCount on target synchronously
+      if (modelType === 'Post') {
+        await Post.findByIdAndUpdate(targetId, { $inc: { likesCount: 1 } });
+      } else if (modelType === 'Comment') {
+        await Comment.findByIdAndUpdate(targetId, { $inc: { likesCount: 1 } });
+      }
       try {
         // Notify the target author
         let targetAuthor = null;
@@ -87,6 +99,15 @@ class ReactionService {
       'target.type': modelType,
       userId: userId
     });
+
+    if (reaction) {
+      // decrement likesCount on the target
+      if (modelType === 'Post') {
+        await Post.findByIdAndUpdate(targetId, { $inc: { likesCount: -1 } });
+      } else if (modelType === 'Comment') {
+        await Comment.findByIdAndUpdate(targetId, { $inc: { likesCount: -1 } });
+      }
+    }
 
     return reaction;
   }
