@@ -48,9 +48,9 @@ app.get("/google-setup", (req, res) => {
   });
 });
 
-app.use('/', auth);
+app.use('/api/auth', auth);
 app.use('/api/users', usersRoute);
-app.use('/connection', connection);
+app.use('api/connections', connection);
 app.use('/api/companies', company);
 app.use('/api/posts', postRoutes);
 app.use('/api/trends', trendsRoutes);

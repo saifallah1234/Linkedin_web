@@ -74,75 +74,10 @@ router.post(
   validate,
   authController.signupUser
 );
-/**
- * @swagger
- * /signup/user/google:
- *   post:
- *     summary: Register a new user with Google
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - googleToken
- *             properties:
- *               googleToken:
- *                 type: string
- *                 description: Google ID token from frontend
- *               location:
- *                 type: string
- *                 description: User's location (optional)
- *               dateOfBirth:
- *                 type: string
- *                 format: date
- *                 description: User's date of birth (optional)
- *     responses:
- *       201:
- *         description: User created successfully with Google
- *       400:
- *         description: Invalid token or email already registered
- */
-router.post(
-  '/signup/user/google',
-  [
-    body('googleToken').notEmpty().withMessage('Google token is required')
-  ],
-  validate,
-  authController.signupUserWithGoogle
-);
 
-/**
- * @swagger
- * /check-google-signup:
- *   post:
- *     summary: Check if email can be used for Google signup
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: Check result
- */
-router.post(
-  '/check-google-signup',
-  [
-    body('email').isEmail().withMessage('Valid email is required')
-  ],
-  validate,
-  authController.checkGoogleSignupAvailability
-);
+
+
+
 /**
  * @swagger
  * /login:
@@ -205,39 +140,7 @@ router.post(
   authController.unifiedLogin
 );
 
-/**
- * @swagger
- * /login/google:
- *   post:
- *     summary: Unified Google login for users
- *     tags: [Auth]
- *     description: Google login that works for both existing and new users
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - googleToken
- *             properties:
- *               googleToken:
- *                 type: string
- *                 description: Google ID token from frontend
- *     responses:
- *       200:
- *         description: Google login successful
- *       400:
- *         description: Invalid token or account type mismatch
- */
-router.post(
-  '/login/google',
-  [
-    body('googleToken').notEmpty().withMessage('Google token is required')
-  ],
-  validate,
-  authController.unifiedGoogleLogin
-);
+
 
 /**
  * @swagger

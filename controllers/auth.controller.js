@@ -2,7 +2,6 @@ const User = require('../models/User.model');
 const Company = require('../models/Company.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { verifyGoogleToken } = require('../utils/googleAuth'); // ADD THIS IMPORT
 
 const generateToken = (id, role) => {
   // Ensure role is properly capitalized for your middleware
@@ -59,70 +58,6 @@ exports.signupUser = async (req, res) => {
   }
 };
 
-// --- NEW: Google Signup for Users ---
-exports.signupUserWithGoogle = async (req, res) => {
-  try {
-    const { googleToken, location, dateOfBirth } = req.body;
-    
-    if (!googleToken) {
-      return res.status(400).json({ message: 'Google token is required' });
-    }
-
-    // Verify Google token and get user info
-    const googleUser = await verifyGoogleToken(googleToken);
-    
-    // Check if email already exists
-    const existingUser = await User.findOne({ email: googleUser.email });
-    const existingCompany = await Company.findOne({ email: googleUser.email });
-    
-    if (existingUser || existingCompany) {
-      return res.status(400).json({ 
-        message: 'Email already registered. Please use regular login.' 
-      });
-    }
-
-    // Create user with Google data
-    const user = await User.create({
-      googleId: googleUser.googleId,
-      email: googleUser.email,
-      firstName: googleUser.firstName,
-      lastName: googleUser.lastName,
-      location: location || 'Unknown',
-      dateOfBirth: dateOfBirth || null,
-      image: googleUser.picture || '',
-      isGoogleUser: true,
-      // No password for Google users
-      password: undefined
-    });
-
-    const token = generateToken(user._id, 'USER');
-
-    res.status(201).json({
-      message: "User registered successfully with Google",
-      token,
-      user: {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        image: user.image,
-        location: user.location,
-        isGoogleUser: user.isGoogleUser
-      }
-    });
-
-  } catch (error) {
-    console.error('Google signup error:', error);
-    
-    if (error.message === 'Invalid Google token') {
-      return res.status(400).json({ message: 'Invalid Google token' });
-    }
-    
-    res.status(500).json({ 
-      message: error.message || 'Google signup failed' 
-    });
-  }
-};
 
 // --- 2. Company Signup ---
 exports.signupCompany = async (req, res) => {
@@ -177,12 +112,6 @@ exports.loginUser = async (req, res) => {
       return res.status(401).json({ message: 'User account not found' });
     }
 
-    // Check if this is a Google user trying to use password login
-    if (user.googleId || user.isGoogleUser) {
-      return res.status(400).json({ 
-        message: 'This account uses Google authentication. Please sign in with Google.' 
-      });
-    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -257,34 +186,6 @@ exports.loginCompany = async (req, res) => {
   }
 };
 
-// --- NEW: Check Google Signup Availability ---
-exports.checkGoogleSignupAvailability = async (req, res) => {
-  try {
-    const { email } = req.body;
-    
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
-    }
-
-    const existingUser = await User.findOne({ email });
-    const existingCompany = await Company.findOne({ email });
-
-    if (existingUser || existingCompany) {
-      return res.json({
-        canUseGoogle: false,
-        message: 'Email already registered. Please use regular login.'
-      });
-    }
-
-    res.json({
-      canUseGoogle: true,
-      message: 'Email available for Google signup'
-    });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 exports.unifiedLogin = async (req, res) => {
   try {
@@ -400,110 +301,6 @@ exports.unifiedLogin = async (req, res) => {
   }
 };
 
-// --- NEW: Unified Google Login - UPDATED FOR YOUR MIDDLEWARE ---
-exports.unifiedGoogleLogin = async (req, res) => {
-  try {
-    const { googleToken } = req.body;
-    
-    if (!googleToken) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Google token is required' 
-      });
-    }
-
-    // Verify Google token
-    const googleUser = await verifyGoogleToken(googleToken);
-    
-    // Search in both collections
-    const existingUser = await User.findOne({ email: googleUser.email });
-    const existingCompany = await Company.findOne({ email: googleUser.email });
-
-    let account = null;
-    let role = '';
-    let type = '';
-
-    if (existingUser) {
-      // Check if this user was originally created with Google
-      if (!existingUser.googleId && !existingUser.isGoogleUser) {
-        return res.status(400).json({ 
-          success: false,
-          message: 'This email is registered with regular password. Please use password login.' 
-        });
-      }
-      
-      account = existingUser;
-      role = 'User'; // Capitalized for your middleware
-      type = 'user';
-      
-      // Update Google info if needed
-      if (!account.googleId) {
-        account.googleId = googleUser.googleId;
-        account.isGoogleUser = true;
-        await account.save();
-      }
-      
-    } else if (existingCompany) {
-      // Companies typically don't use Google login
-      return res.status(400).json({ 
-        success: false,
-        message: 'This email is registered as a company account. Please use password login.' 
-      });
-    } else {
-      // No account exists - could create one automatically or return error
-      return res.status(404).json({ 
-        success: false,
-        message: 'No account found with this email. Please sign up first.',
-        email: googleUser.email,
-        canSignup: true
-      });
-    }
-
-    // Generate token - use corrected role format
-    const token = generateToken(account._id, role);
-
-    // Prepare response
-    let response = {
-      success: true,
-      message: `${type.charAt(0).toUpperCase() + type.slice(1)} Google login successful`,
-      token,
-      role,
-      accountType: type
-    };
-
-    if (type === 'user') {
-      const userData = account.toObject();
-      delete userData.password;
-      
-      response.user = {
-        _id: userData._id,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        image: userData.image || googleUser.picture,
-        location: userData.location,
-        isGoogleUser: userData.isGoogleUser
-      };
-    }
-
-    res.json(response);
-
-  } catch (error) {
-    console.error('Unified Google login error:', error);
-    
-    if (error.message === 'Invalid Google token') {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Invalid Google token' 
-      });
-    }
-    
-    res.status(500).json({ 
-      success: false,
-      message: error.message || 'Google login failed' 
-    });
-  }
-};
 
 // --- Get Current Session Info (Compatible with your middleware) ---
 exports.getCurrentSession = async (req, res) => {
