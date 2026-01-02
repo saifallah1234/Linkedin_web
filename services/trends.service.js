@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Post = mongoose.models.Post || require('../models/Post.model');
+const Post = mongoose.models.Post || require('../models/post.model');
 const JobOffer = mongoose.models.JobOffer || require('../models/JobOffer.model');
 
 /**

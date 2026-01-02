@@ -162,25 +162,31 @@ class ReactionService {
     const modelType = targetType.charAt(0).toUpperCase() + targetType.slice(1);
 
     const stats = await Reaction.aggregate([
-      {
-        $match: {
-          'target.id': mongoose.Types.ObjectId(targetId),
-          'target.type': modelType
+        {
+            $match: {
+                'target.id': new mongoose.Types.ObjectId(targetId), // FIXED: Use new keyword
+                'target.type': modelType
+            }
+        },
+        {
+            $group: {
+                _id: '$reactionType',
+                count: { $sum: 1 }
+            }
         }
-      },
-      {
-        $group: {
-          _id: '$reactionType',
-          count: { $sum: 1 }
-        }
-      }
     ]);
 
-    return stats.reduce((acc, stat) => {
-      acc[stat._id] = stat.count;
-      return acc;
-    }, {});
-  }
-}
+    // Convert to object with default values
+    const result = {};
+    Object.keys(this.reactionTypes).forEach(type => {
+        result[type] = 0;
+    });
+
+    stats.forEach(stat => {
+        result[stat._id] = stat.count;
+    });
+
+    return result;
+}}
 
 module.exports = ReactionService;

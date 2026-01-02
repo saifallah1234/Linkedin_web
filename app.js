@@ -10,6 +10,12 @@ const company = require('./routes/company.route');
 const postRoutes = require('./routes/post.routes');
 const trendsRoutes = require('./routes/trends.routes');
 const app = express();
+const cors = require("cors");
+
+app.use(cors({
+  origin: "*", // or "*"
+  credentials: true
+}));
 
 // Global Middleware
 app.use(express.json());

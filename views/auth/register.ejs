@@ -26,7 +26,7 @@
                 <p class="text-secondary">Start your professional journey today</p>
             </div>
 
-            <form action="/auth/register" method="POST">
+            <form id="signupForm" enctype="multipart/form-data">
                 <!-- Account Type -->
                 <div class="mb-4">
                     <div class="d-flex gap-3 mb-3">
@@ -51,25 +51,35 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">First name</label>
-                        <input type="text" class="form-input" value="John" required>
+                        <input id="firstName" name="firstName" type="text" class="form-input" value="John" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Last name</label>
-                        <input type="text" class="form-input" value="Doe" required>
+                        <input id="lastName" name="lastName" type="text" class="form-input" value="Doe" required>
                     </div>
                 </div>
 
                 <!-- Email -->
                 <div class="form-group mb-3">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-input" value="name@example.com" required>
+                    <input id="signupEmail" name="email" type="email" class="form-input" value="name@example.com" required>
                 </div>
 
                 <!-- Password -->
                 <div class="form-group mb-4">
                     <label class="form-label">Password</label>
-                    <input type="password" class="form-input" value="********" required>
+                    <input id="signupPassword" name="password" type="password" class="form-input" value="" required>
                     <p class="small text-secondary mt-1">Minimum 8 characters</p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Location</label>
+                    <input id="signupLocation" name="location" type="text" class="form-input" value="" required>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Profile image (optional)</label>
+                    <input id="signupImage" name="image" type="file" class="form-input">
                 </div>
 
                 <!-- Terms -->
@@ -80,8 +90,55 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn-primary mb-3">Create account</button>
+                                <button id="signupBtn" type="submit" class="btn-primary mb-3">Create account</button>
             </form>
+                        <script src="/js/auth.js"></script>
+                        <script>
+                            // handle account type selection
+                            let selectedAccountType = 'professional';
+                            function selectAccountType(type) {
+                                selectedAccountType = type;
+                                document.querySelectorAll('.card-nexus').forEach(card => {
+                                        card.style.border = '1px solid var(--border-color)';
+                                        card.style.background = 'white';
+                                });
+                                event.currentTarget.style.border = '2px solid var(--primary-color)';
+                                event.currentTarget.style.background = '#f0f7ff';
+                            }
+
+                            document.getElementById('signupForm').addEventListener('submit', async function(e){
+                                e.preventDefault();
+                                const form = document.getElementById('signupForm');
+                                const fd = new FormData(form);
+                                const errorMsg = document.getElementById('signupErrorMsg') || document.createElement('div');
+                                if (!document.getElementById('signupErrorMsg')) {
+                                  errorMsg.id = 'signupErrorMsg';
+                                  errorMsg.className = 'alert alert-danger d-none mt-3';
+                                  form.appendChild(errorMsg);
+                                }
+                                errorMsg.classList.add('d-none');
+                                // append selected account type
+                                if (selectedAccountType === 'company') {
+                                    try {
+                                        const res = await auth.signupCompany(fd);
+                                        if (res.company) localStorage.setItem('currentUser', JSON.stringify(res.company));
+                                        window.location.href = '/company';
+                                    } catch (err) {
+                                        errorMsg.classList.remove('d-none');
+                                        errorMsg.textContent = err.message || (err.errors && err.errors.map(e=>e.msg).join(', ')) || 'Signup failed';
+                                    }
+                                } else {
+                                    try {
+                                        const res = await auth.signupUser(fd);
+                                        if (res.user) localStorage.setItem('currentUser', JSON.stringify(res.user));
+                                        window.location.href = '/feed';
+                                    } catch (err) {
+                                        errorMsg.classList.remove('d-none');
+                                        errorMsg.textContent = err.message || (err.errors && err.errors.map(e=>e.msg).join(', ')) || 'Signup failed';
+                                    }
+                                }
+                            });
+                        </script>
         </div>
     </div>
 </div>

@@ -134,25 +134,33 @@ class ReactionController {
   // Get reaction statistics
   static async getReactionStats(req, res) {
     try {
-      const { targetType, targetId } = req.params;
+        const { targetType, targetId } = req.params;
 
-      const stats = await ReactionService.getReactionStats(
-        targetType,
-        targetId
-      );
+        // Validate targetId is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(targetId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid target ID'
+            });
+        }
 
-      res.json({
-        success: true,
-        data: stats
-      });
+        const stats = await ReactionService.getReactionStats(
+            targetType,
+            targetId
+        );
+
+        res.json({
+            success: true,
+            data: stats
+        });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Error fetching reaction stats',
-        error: error.message
-      });
+        console.error('Error fetching reaction stats:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching reaction stats',
+            error: error.message
+        });
     }
-  }
-}
+}}
 
 module.exports = ReactionController;
