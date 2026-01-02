@@ -2,6 +2,8 @@ const express = require("express");
 const morgan = require("morgan");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
+const path = require("path"); // ADD THIS LINE
+const cors = require("cors");
 
 const auth = require('./routes/auth.route');
 const usersRoute = require('./routes/user.route');
@@ -9,8 +11,8 @@ const connection = require('./routes/connection.route');
 const company = require('./routes/company.route');
 const postRoutes = require('./routes/post.routes');
 const trendsRoutes = require('./routes/trends.routes');
+
 const app = express();
-const cors = require("cors");
 
 app.use(cors({
   origin: "*", // or "*"
@@ -28,6 +30,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/", (req, res) => {
   res.send("✅ LinkedIn Clone API is running...");
 });
+
 app.get("/google-setup", (req, res) => {
   const hasGoogleConfig = !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET;
   
@@ -54,13 +57,20 @@ app.get("/google-setup", (req, res) => {
   });
 });
 
+// 🔥 FIX: Static file serving for uploads
+// Use either one of these, not both:
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// OR if uploads is in the same directory as app.js
+// app.use('/uploads', express.static('uploads'));
+
+// Routes
 app.use('/', auth);
 app.use('/api/users', usersRoute);
 app.use('/connection', connection);
 app.use('/api/companies', company);
 app.use('/api/posts', postRoutes);
 app.use('/api/trends', trendsRoutes);
-
 
 app.use('/api/jobs', require('./routes/job.routes'));
 app.use('/api/messages', require('./routes/message.route'));
