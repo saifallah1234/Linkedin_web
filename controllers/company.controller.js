@@ -2,6 +2,29 @@ const Company = require('../models/Company.model');
 const JobOffer = require('../models/JobOffer.model');
 const mongoose = require('mongoose');
 const fs = require('fs');
+exports.getCompanyProfileById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid Company ID format' });
+    }
+
+    const company = await Company.findById(id)
+      .select('-password')
+      .populate('followers', 'firstName lastName image headline');
+
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    res.json(company);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 exports.getCompanyProfile = async (req, res) => {
   try {
