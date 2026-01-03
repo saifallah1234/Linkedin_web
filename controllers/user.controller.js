@@ -2,6 +2,24 @@ const User = require('../models/User.model');
 const mongoose = require('mongoose');
 const JobOffer = require('../models/JobOffer.model');
 
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+
+    // Find all users where _id is NOT EQUAL ($ne) to currentUserId
+    const users = await User.find({ _id: { $ne: currentUserId } })
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    res.json(users);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 exports.getUserProfile = async (req, res) => {
   try {
     const userId= req.user.id;
@@ -31,56 +49,60 @@ exports.getUserProfile = async (req, res) => {
 // ... existing imports
 const fs = require('fs'); // Needed to delete old images if replaced
 
+
 exports.updateUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    // --- 1. SECURITY: Ownership Check ---
-    // Ensure the user requesting the update is the owner of the account
-    if (req.user.id !== id) {
-      return res.status(403).json({ message: 'You can only update your own profile' });
+    // --- 1. FIX: Extract ID correctly ---
+    // WRONG: const { id } = req.user.id; 
+    // RIGHT: Access .id directly. handle req.user._id or req.user.id
+    let userId = req.user.id || req.user._id;
+
+    // Fix the "Buffer" error: Force it to a string
+    if (userId && typeof userId === 'object' && userId.toString) {
+      userId = userId.toString();
     }
 
     // --- 2. Prepare Update Data ---
-    // We copy req.body so we can modify it safely
     const updates = { ...req.body };
 
-    // Prevent updating sensitive fields via this route
+    // Prevent updating sensitive fields
     delete updates.role;
     delete updates._id;
     delete updates.createdAt;
+    delete updates.password; // Important security addition
 
     // --- 3. Handle Image Upload ---
-    // If a file was uploaded, we use its path. 
-    // If no file, we keep whatever was in req.body (or do nothing)
     if (req.file) {
       updates.image = req.file.path;
       
-      // Logic to delete the old image file from server to save space
-      const oldUser = await User.findById(id);
-      if (oldUser.image && fs.existsSync(oldUser.image)) fs.unlinkSync(oldUser.image);
+      // Delete old image
+      try {
+        const oldUser = await User.findById(userId);
+        if (oldUser && oldUser.image && fs.existsSync(oldUser.image)) {
+           fs.unlinkSync(oldUser.image);
+        }
+      } catch (err) {
+        console.error("Error cleaning up old image:", err);
+      }
     }
 
-    // --- 4. Parse Arrays (If sent as JSON strings) ---
-    // If you use Postman 'form-data', arrays often arrive as strings like '[{"school":"MIT"}]'
-    // We need to parse them back into Objects.
+    // --- 4. Parse Arrays ---
     ['education', 'projects', 'experiences', 'skills', 'certificates'].forEach(field => {
-      if (typeof updates[field] === 'string') {
+      if (updates[field] && typeof updates[field] === 'string') {
         try {
           updates[field] = JSON.parse(updates[field]);
         } catch (e) {
-          // If parsing fails, it might be an empty string or invalid, so we delete it to avoid DB error
           delete updates[field];
         }
       }
     });
 
     // --- 5. Perform Update ---
-    // { new: true } returns the updated document
-    // { runValidators: true } ensures data matches Schema rules
-    const updatedUser = await User.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true
-    }).select('-password');
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, // Use the sanitized userId string
+      { $set: updates }, // Use $set for safer updates
+      { new: true, runValidators: true }
+    ).select('-password');
 
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
@@ -92,10 +114,11 @@ exports.updateUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Update Error:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const Company = require('../models/Company.model'); // Don't forget to import Company!
 

@@ -28,6 +28,26 @@ const upload = require('../middleware/upload');
  */
 router.get('/profile', authenticate, isUser, userController.getUserProfile);
 
+/**
+ * @swagger
+ * /api/users/all:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.get('/all', authenticate, userController.getAllUsers);
+
+
+
 // Public profile by id (no auth) - used by web profile pages
 /**
  * @swagger
@@ -70,7 +90,7 @@ router.get('/following', authenticate, isUser, userController.getFollowingList);
 // Update user profile
 /**
  * @swagger
- * /api/users/profile/{id}:
+ * /api/users/profile/update:
  *   put:
  *     summary: Update user profile
  *     tags: [Users]
@@ -113,7 +133,7 @@ router.get('/following', authenticate, isUser, userController.getFollowingList);
  *         description: Unauthorized
  */
 router.put(
-  '/profile/:id',
+  '/profile/update',
   authenticate, isUser,
   upload.single('image'),
   userController.updateUser

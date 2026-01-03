@@ -3,6 +3,25 @@ const JobOffer = require('../models/JobOffer.model');
 const mongoose = require('mongoose');
 const fs = require('fs');
 
+
+exports.getAllCompanies = async (req, res) => {
+  try {
+    // 1. Find all companies
+    // .select('-password') ensures security
+    // .sort({ name: 1 }) sorts them alphabetically (optional)
+    const companies = await Company.find()
+      .select('-password')
+      .sort({ name: 1 }); 
+
+    // 2. Send Data
+    res.json(companies);
+
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 exports.getCompanyProfile = async (req, res) => {
   try {
     const id = req.user.id;

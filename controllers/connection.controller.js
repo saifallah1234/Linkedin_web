@@ -231,26 +231,87 @@ exports.getMyConnections = async (req, res) => {
   }
 };
 
-// --- Disconnect / Unfriend ---
+// --- Check Connection Status (for Profile View) ---
+exports.checkConnectionStatus = async (req, res) => {
+  try {
+    const currentUserId = toStr(req.user.id);
+    const targetUserId = req.params.userId;
+
+    if (!targetUserId) {
+        return res.status(400).json({ message: "Target user ID is required" });
+    }
+
+    // Check for existing connection in EITHER direction
+    const connection = await Connection.findOne({
+      $or: [
+        { requesterId: currentUserId, receiverId: targetUserId },
+        { requesterId: targetUserId, receiverId: currentUserId }
+      ]
+    });
+
+    // Case 1: No connection exists at all
+    if (!connection) {
+      return res.json({ 
+        status: 'NONE', 
+        isRequester: false,
+        connectionId: null 
+      });
+    }
+
+    // Case 2: Connection found
+    // 'isRequester' helps the UI decide whether to show "Request Sent" vs "Accept/Reject"
+    const isRequester = toStr(connection.requesterId) === currentUserId;
+
+    return res.json({
+      status: connection.status, // 'PENDING', 'ACCEPTED', 'REJECTED'
+      isRequester: isRequester,
+      connectionId: connection._id,
+      requesterId: connection.requesterId,
+      receiverId: connection.receiverId
+    });
+
+  } catch (error) {
+    console.error('checkConnectionStatus error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// --- Disconnect / Remove Any Connection ---
 exports.disconnect = async (req, res) => {
   try {
-    const currentUserId = req.user.id.toString();
-    const otherUserId = req.params.userId;
+    const currentUserId = toStr(req.user.id);
+    const targetUserId = req.params.userId;
 
-    // Find an ACCEPTED connection in either direction
+    // Remove the connection record regardless of its status (PENDING, ACCEPTED, REJECTED)
+    // This handles Unfriending, Canceling sent requests, and Rejecting received requests.
     const conn = await Connection.findOneAndDelete({
-      status: 'ACCEPTED',
       $or: [
-        { requesterId: currentUserId, receiverId: otherUserId },
-        { requesterId: otherUserId, receiverId: currentUserId }
+        { requesterId: currentUserId, receiverId: targetUserId },
+        { requesterId: targetUserId, receiverId: currentUserId }
       ]
     });
 
     if (!conn) {
-      return res.status(404).json({ message: 'No accepted connection found between these users.' });
+      return res.status(404).json({ message: 'No connection found between these users.' });
     }
 
-    return res.json({ message: 'Disconnected successfully', connection: conn });
+    // Clean up any associated notifications to avoid dead links
+    try {
+        await notificationService.deleteNotification({
+            recipient: targetUserId,
+            sender: currentUserId,
+            type: 'connection_request'
+        });
+        await notificationService.deleteNotification({
+            recipient: currentUserId,
+            sender: targetUserId,
+            type: 'connection_request'
+        });
+    } catch (err) {
+        console.warn('Notification cleanup failed (non-fatal):', err.message);
+    }
+
+    return res.json({ message: 'Connection removed successfully', connection: conn });
   } catch (err) {
     console.error('disconnect error:', err);
     return res.status(500).json({ message: err.message });

@@ -125,7 +125,7 @@ exports.signupUserWithGoogle = async (req, res) => {
 };
 
 // --- 2. Company Signup ---
-exports.signupCompany = async (req, res) => {
+exports.signupCompany = async (req, res, next) => {
   try {
     const { name, email, password, location, website, description } = req.body;
     
@@ -285,26 +285,25 @@ exports.checkGoogleSignupAvailability = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 exports.unifiedLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ 
-        success: false,
+        success: false, 
         message: 'Email and password are required' 
       });
     }
 
-    // Search in both collections
+    // 1. Fetch BOTH potential accounts at once
     const user = await User.findOne({ email }).select('+password');
     const company = await Company.findOne({ email }).select('+password');
 
-    // Check if account exists
+    // 2. If neither exists, stop here
     if (!user && !company) {
       return res.status(401).json({ 
-        success: false,
+        success: false, 
         message: 'Account not found' 
       });
     }
@@ -313,44 +312,41 @@ exports.unifiedLogin = async (req, res) => {
     let role = '';
     let type = '';
 
+    // 3. Attempt to match USER password first
     if (user) {
-      // Check if this is a Google user trying to use password login
-      if (user.googleId || user.isGoogleUser) {
-        return res.status(400).json({ 
-          success: false,
-          message: 'This account uses Google authentication. Please sign in with Google.' 
-        });
+      // Only check password if it's not a Google-only account
+      if (!user.googleId && !user.isGoogleUser) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+          account = user;
+          role = 'User';
+          type = 'user';
+        }
       }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(401).json({ 
-          success: false,
-          message: 'Invalid credentials' 
-        });
-      }
-      
-      account = user;
-      role = 'User'; // Must be 'User' (capitalized) for your middleware
-      type = 'user';
-    } else if (company) {
-      const isMatch = await bcrypt.compare(password, company.password);
-      if (!isMatch) {
-        return res.status(401).json({ 
-          success: false,
-          message: 'Invalid credentials' 
-        });
-      }
-      
-      account = company;
-      role = 'Company'; // Must be 'Company' (capitalized) for your middleware
-      type = 'company';
     }
 
-    // Generate token - use the corrected role format
+    // 4. If User didn't match (account is still null), try COMPANY
+    if (!account && company) {
+      const isMatch = await bcrypt.compare(password, company.password);
+      if (isMatch) {
+        account = company;
+        role = 'Company';
+        type = 'company';
+      }
+    }
+
+    // 5. If neither matched after checking both
+    if (!account) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Invalid credentials' 
+      });
+    }
+
+    // 6. Success! Generate Token
     const token = generateToken(account._id, role);
 
-    // Prepare response based on account type
+    // 7. Prepare Response
     let response = {
       success: true,
       message: `${type.charAt(0).toUpperCase() + type.slice(1)} login successful`,
@@ -360,33 +356,13 @@ exports.unifiedLogin = async (req, res) => {
     };
 
     if (type === 'user') {
-      // Clean user response
       const userData = account.toObject();
       delete userData.password;
-      
-      response.user = {
-        _id: userData._id,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        image: userData.image,
-        location: userData.location,
-        isGoogleUser: userData.isGoogleUser
-      };
-    } else if (type === 'company') {
-      // Clean company response
+      response.user = userData;
+    } else {
       const companyData = account.toObject();
       delete companyData.password;
-      
-      response.company = {
-        _id: companyData._id,
-        name: companyData.name,
-        email: companyData.email,
-        logo: companyData.logo,
-        location: companyData.location,
-        website: companyData.website,
-        description: companyData.description
-      };
+      response.company = companyData;
     }
 
     res.json(response);
@@ -394,7 +370,7 @@ exports.unifiedLogin = async (req, res) => {
   } catch (error) {
     console.error('Unified login error:', error);
     res.status(500).json({ 
-      success: false,
+      success: false, 
       message: error.message || 'Login failed' 
     });
   }

@@ -395,4 +395,5 @@ router.post(
   authController.loginCompany,
 );
 
+
 module.exports = router;

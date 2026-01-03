@@ -105,7 +105,57 @@ router.get('/pending', authenticate, connectionController.getPendingRequests);
  */
 router.get('/', authenticate, connectionController.getMyConnections);
 
-// Disconnect / unfriend a user
+/**
+ * @swagger
+ * /connection/disconnect/{userId}:
+ *   delete:
+ *     summary: Disconnect (unfriend) a user
+ *     tags: [Connections]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to disconnect from
+ *     responses:
+ *       200:
+ *         description: User disconnected successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Connection not found
+ */
 router.delete('/disconnect/:userId', authenticate, connectionController.disconnect);
+
+
+
+/**
+ * @swagger
+ * /connection/status/{userId}:
+ *   get:
+ *     summary: Check connection status with a user
+ *     tags: [Connections]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to check connection status with
+ *     responses:
+ *       200:
+ *         description: Connection status retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.get('/status/:userId', authenticate, connectionController.checkConnectionStatus);
+
 
 module.exports = router;

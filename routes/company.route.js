@@ -132,6 +132,26 @@ router.get('/jobs', authenticate, isCompany, companyController.getMyJobs);
  */
 router.get('/jobs/:id/applicants', authenticate, isCompany, companyController.getJobApplicants);
 
+
+/**
+ * @swagger
+ * /api/companies/all:
+ *   get:
+ *     summary: Get all companies
+ *     tags: [Companies]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of companies retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.get('/all', authenticate, companyController.getAllCompanies);
+
+
 /**
  * @swagger
  * /api/companies/jobs/{id}:

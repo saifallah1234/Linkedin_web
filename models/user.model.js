@@ -6,7 +6,10 @@ const bcrypt = require('bcryptjs'); // Add bcrypt import
 const projectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   link: { type: String },
-  technologies: [{ type: String }] // Array of strings e.g. ["React", "Node"]
+  technologies: [{ type: String }],
+  description: { type: String },
+  startDate: { type: Date },     
+  endDate: { type: Date }        
 });
 const educationSchema = new mongoose.Schema({
   school: { type: String, required: true }, // e.g., "Harvard University"
