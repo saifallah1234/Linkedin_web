@@ -80,10 +80,22 @@ exports.createJob = async (req, res) => {
 
 exports.closeJob = async (req, res) => {
   try {
-    const job = await jobService.closeJob(req.params.id, req.user.id);
-    res.status(200).json({ message: "Job closed successfully", job });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const jobId = req.params.id;
+    const companyId = req.user.id;
+
+    const job = await jobService.closeJob(jobId, companyId);
+
+    res.json({
+      success: true,
+      message: "Job closed successfully",
+      job,
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -98,6 +110,7 @@ exports.updateApplicantStatus = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 // --- NEW AI SCORING ENDPOINTS ---
 

@@ -13,7 +13,8 @@ const mongoose = require('mongoose');
  */
 
 // Protect all messaging routes (users only)
-router.use(authenticate, isUser);
+//router.use(authenticate, isUser);
+router.use(authenticate);
 
 // Add this middleware to parse multipart form data
 router.use(express.urlencoded({ extended: true }));
@@ -112,10 +113,13 @@ router.post(
       });
     }
     
-    if (!req.body.content) {
-      console.log('ERROR: content is missing');
-      return res.status(400).json({ 
-        message: "content is required" 
+    const hasContent = req.body.content && req.body.content.trim().length > 0;
+    const hasFiles = req.files && req.files.length > 0;
+
+    if (!hasContent && !hasFiles) {
+      console.log('ERROR: message must have content or attachments');
+      return res.status(400).json({
+        message: "Message must contain text or at least one attachment"
       });
     }
     

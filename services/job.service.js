@@ -118,7 +118,12 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
   await job.save();
 
  
-  return job;
+  return {
+  success: true,
+  score: aiScore,
+  matchPercentage,
+  aiFeedback
+};
 };
 
 exports.updateApplicantStatus = async (jobId, applicantId, status) => {
@@ -129,6 +134,28 @@ exports.updateApplicantStatus = async (jobId, applicantId, status) => {
   );
 };
 
+exports.closeJob = async (jobId, companyId) => {
+
+  const job = await JobOffer.findById(jobId);
+
+  if (!job) {
+    throw new Error("Job not found");
+  }
+
+  if (job.companyId.toString() !== companyId.toString()) {
+    throw new Error("Unauthorized");
+  }
+
+  if (!job.isActive) {
+    throw new Error("Job already closed");
+  }
+
+  job.isActive = false;
+  job.status = "closed";
+  await job.save();
+
+  return job;
+};
 // New function: Get top candidates for a job
 exports.getTopCandidates = async (jobId, limit = 10) => {
   const job = await JobOffer.findById(jobId)

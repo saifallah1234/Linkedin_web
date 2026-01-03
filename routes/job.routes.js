@@ -335,4 +335,6 @@ router.post('/:id/rescore', authenticate, isCompany, jobCtrl.rescoreApplicants);
  */
 router.get('/:id/statistics', authenticate, isCompany, jobCtrl.getJobStatistics);
 
+
+
 module.exports = router;

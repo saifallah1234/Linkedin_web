@@ -14,7 +14,7 @@ exports.send = async (req, res) => {
         const msg = await messageService.sendMessage(
           req.user.id, 
           receiverId, 
-          content, 
+          content||"", 
           attachments || []
         );
         
