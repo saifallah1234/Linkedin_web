@@ -54,7 +54,15 @@ exports.updateCompany = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (req.user.id !== id) {
+    // First, find the company to check ownership
+    const company = await Company.findById(id);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    // Check if the authenticated user is the owner of this company
+    // Compare IDs as strings to avoid ObjectId vs string mismatch
+    if (req.user.id.toString() !== company._id.toString() && req.user.id.toString() !== company.ownerId?.toString()) {
       return res.status(403).json({ message: 'You can only update your own company profile' });
     }
 
