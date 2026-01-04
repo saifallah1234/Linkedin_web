@@ -1,4 +1,4 @@
-const JobOffer = require('../models//JobOffer.model');
+const JobOffer = require('../models/JobOffer.model');
 const Message = require('../models/message.model');
 const User = require('../models/User.model');
 const messageService = require('../services/message.service');
