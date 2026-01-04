@@ -62,10 +62,10 @@ const notificationSchema = new mongoose.Schema({
         'Post',
         'Reaction',
         'Comment',
-        'JobOffer',
+        'JobOffer',      
         'Connection',
-        'JobApplication',
-        'Message' // ← ADD THIS (capital M to match your Message model)
+        'JobApplication', 
+        'Message' 
       ]
     }
   },

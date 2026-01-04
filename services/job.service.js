@@ -137,15 +137,17 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
   }
 
   try {
-    await notificationService.createNotification(
-      { id: job.companyId.toString(), type: 'Company' },
-      { id: userId.toString(), type: 'User' },
-      'job_application',
-      { id: job._id.toString(), type: 'JobApplication' }
-    );
+      await notificationService.createNotification(
+        { id: job.companyId.toString(), type: 'Company' },
+        { id: userId.toString(), type: 'User' },
+        'job_application',
+        
+        { id: job._id.toString(), type: 'JobOffer' } 
+      );
   } catch (notifError) {
-    console.error('Failed to create notification:', notifError);
+      console.error('Failed to create notification:', notifError);
   }
+  
  
   return {
     jobId: job._id,
