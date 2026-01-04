@@ -1,6 +1,8 @@
 const JobOffer = require('../models//JobOffer.model');
 const Message = require('../models/message.model');
 const User = require('../models/User.model');
+const messageService = require('../services/message.service');
+const notificationService = require('../services/notification.service');
 const { generateJobDescription, enhanceJobDescription } = require('../utils/jobDescriptionAI');
 const { generateApplicantScore, updateAllApplicantScores } = require('../utils/aiScoring');
 
@@ -58,14 +60,17 @@ exports.getJobById = async (jobId) => {
     .populate('companyId', 'name logo location website description')
     .populate('applicants.userId', 'firstName lastName image headline location');
 };
-
 exports.applyToJob = async (jobId, userId, applicationData) => {
   const job = await JobOffer.findById(jobId);
   if (!job || !job.isActive) throw new Error('Job not found or closed');
-
-  const alreadyApplied = job.applicants.some(a => a.userId.toString() === userId);
+  console.log('Applying user:', userId, 'to job:', jobId);
+  console.log('UserId type:', typeof userId);
+  console.log('Current applicants count:', job.applicants.length);
+  job.applicants.forEach((app, index) => {
+  console.log(`Applicant ${index}: userId=${app.userId.toString()}, match=${app.userId.toString() === userId}`);
+});
+  const alreadyApplied = job.applicants.some(a => a.userId.toString() === userId.toString());
   if (alreadyApplied) throw new Error('Already applied to this job');
-
   // Get user profile for AI scoring
   const user = await User.findById(userId)
     .select('firstName lastName headline location about experiences skills education projects certificates')
@@ -117,15 +122,36 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
 
   await job.save();
 
+  // Handle message and notification separately - don't fail the application if these fail
+  try {
+      await messageService.sendMessage(
+        userId.toString(),
+        job.companyId.toString(),
+        `Hello, I've just applied for the "${job.title}" position.`,
+        [],
+        'User',
+        'Company'
+  );
+  } catch (msgError) {
+    console.error('Failed to send application message:', msgError);
+  }
+
+  try {
+    await notificationService.createNotification(
+      { id: job.companyId.toString(), type: 'Company' },
+      { id: userId.toString(), type: 'User' },
+      'job_application',
+      { id: job._id.toString(), type: 'JobApplication' }
+    );
+  } catch (notifError) {
+    console.error('Failed to create notification:', notifError);
+  }
  
   return {
-  success: true,
-  score: aiScore,
-  matchPercentage,
-  aiFeedback
+    jobId: job._id,
+    applicant: job.applicants[job.applicants.length - 1]
+  };
 };
-};
-
 exports.updateApplicantStatus = async (jobId, applicantId, status) => {
   return await JobOffer.findOneAndUpdate(
     { _id: jobId, "applicants.userId": applicantId },
