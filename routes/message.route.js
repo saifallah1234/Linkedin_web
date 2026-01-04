@@ -106,10 +106,10 @@ router.post(
     console.log('Files:', req.files);
     
     // Validate that receiverId is present (not recipientId)
-    if (!req.body.receiverId) {
-      console.log('ERROR: receiverId is missing');
+    if (!req.body.receiverId|| !req.body.receiverType) {
+      console.log('ERROR: receiverId and receiverType are missing');
       return res.status(400).json({ 
-        message: "receiverId is required" 
+        message: "receiverId and type is required" 
       });
     }
     
@@ -137,7 +137,7 @@ router.post(
     // Process attachments
     if (req.files) {
       req.body.attachments = req.files.map(file => ({
-        url: file.path,
+        url: `/uploads/${file.filename}`,
         type: file.mimetype.startsWith('image/')
           ? 'image'
           : file.mimetype.startsWith('video/')

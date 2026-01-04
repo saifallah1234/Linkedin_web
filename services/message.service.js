@@ -2,24 +2,58 @@ const Message = require('../models/message.model');
 const Notification = require('../models/Notification.model');
 
 // Send a message
-exports.sendMessage = async (senderId, receiverId, content, attachments = []) => {
+// exports.sendMessage = async (senderId, receiverId, content, attachments = []) => {
+//     const message = await Message.create({
+//         senderId,
+//         receiverId,
+//         content,
+//         attachments
+//     });
+
+//     // Create a notification for the receiver - FIXED PARAMETERS
+//     try {
+//         await Notification.create({
+//             receiver: {
+//                 id: receiverId,
+//                 type: receiver.type // Assuming both sender and receiver are Users for messages
+//             },
+//             sender: {
+//                 id: senderId,
+//                 type: sender.type
+//             },
+//             type: 'MESSAGE', // This should be in your Notification model enum
+//             entity: {
+//                 id: message._id, // The message itself
+//                 type: 'Message' // This should match your Message model name
+//             }
+//         });
+//     } catch (error) {
+//         console.error("Failed to create notification:", error);
+//         // Don't fail the message if notification fails
+//     }
+
+//     return message;
+// };
+exports.sendMessage = async (sender, receiver, content, attachments = []) => {
     const message = await Message.create({
-        senderId,
-        receiverId,
+        senderId: sender.id,
+        senderType: sender.type,
+        receiverId: receiver.id,
+        receiverType: receiver.type,
         content,
         attachments
     });
 
-    // Create a notification for the receiver - FIXED PARAMETERS
+        // Create a notification for the receiver - FIXED PARAMETERS
     try {
         await Notification.create({
             receiver: {
                 id: receiverId,
-                type: 'User' // Assuming both sender and receiver are Users for messages
+                type: receiver.type // Assuming both sender and receiver are Users for messages
             },
             sender: {
                 id: senderId,
-                type: 'User'
+                type: sender.type
             },
             type: 'MESSAGE', // This should be in your Notification model enum
             entity: {
@@ -34,7 +68,6 @@ exports.sendMessage = async (senderId, receiverId, content, attachments = []) =>
 
     return message;
 };
-
 // Get history between two users
 exports.getChatHistory = async (user1, user2) => {
     // Mark messages as read when history is opened
