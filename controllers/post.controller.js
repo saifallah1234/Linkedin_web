@@ -1,45 +1,64 @@
 const PostService = require('../services/post.service');
 const { generatePostContent } = require('../utils/groq');
+
 class PostController {
   // Create a new post
   static async createPost(req, res) {
-  try {
-    let { content } = req.body;
-    const rawUseAI = req.body.useAI;
-    const useAI = rawUseAI === true || rawUseAI === 'true' || rawUseAI === '1' || rawUseAI === 1;
+    try {
+      let { content } = req.body;
+      const rawUseAI = req.body.useAI;
+      const useAI = rawUseAI === true || rawUseAI === 'true' || rawUseAI === '1' || rawUseAI === 1;
 
-    if (useAI) {
-      content = await generatePostContent(content);
+      if (useAI) {
+        content = await generatePostContent(content);
+      }
+
+      const media = req.files || [];
+      const mediaWithTypes = media.map(file => {
+        // Get MIME type and split it
+        const mimeType = file.mimetype;
+        const [mainType, subType] = mimeType.split('/');
+        
+        // Determine the correct media type for your schema
+        let mediaType;
+        if (mainType === 'image') {
+          mediaType = 'image';
+        } else if (mainType === 'video') {
+          mediaType = 'video';
+        } else if (mimeType === 'application/pdf' || subType === 'pdf') {
+          mediaType = 'pdf';  // Special case for PDFs
+        } else {
+          // Default to image or handle unknown types
+          mediaType = 'image';
+        }
+
+        return {
+          filename: file.filename,
+          mediaType: mediaType,
+          path: file.path
+        };
+      });
+
+      const post = await PostService.createPost(
+        req.user.id,
+        req.user.type,
+        content,
+        mediaWithTypes
+      );
+
+      res.status(201).json({
+        success: true,
+        message: 'Post created successfully',
+        data: post
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error creating post',
+        error: error.message
+      });
     }
-
-    const media = req.files || [];
-    const mediaWithTypes = media.map(file => ({
-      filename: file.filename,
-      mediaType: file.mimetype.split('/')[0],
-      path: file.path
-    }));
-
-    const post = await PostService.createPost(
-      req.user.id,
-      req.user.type,
-      content,
-      mediaWithTypes
-    );
-
-    res.status(201).json({
-      success: true,
-      message: 'Post created successfully',
-      data: post
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error creating post',
-      error: error.message
-    });
   }
-}
-
 
   // Get single post
   static async getPost(req, res) {
@@ -69,47 +88,46 @@ class PostController {
 
   // Update post
   static async updatePost(req, res) {
-  try {
-    const { id } = req.params;
-    let { content } = req.body;
-    const rawUseAI = req.body.useAI;
-    const useAI = rawUseAI === true || rawUseAI === 'true' || rawUseAI === '1' || rawUseAI === 1;
+    try {
+      const { id } = req.params;
+      let { content } = req.body;
+      const rawUseAI = req.body.useAI;
+      const useAI = rawUseAI === true || rawUseAI === 'true' || rawUseAI === '1' || rawUseAI === 1;
 
-    if (content !== undefined && useAI) {
-      content = await generatePostContent(content);
-    }
+      if (content !== undefined && useAI) {
+        content = await generatePostContent(content);
+      }
 
-    const updates = {};
-    if (content !== undefined) updates.content = content;
+      const updates = {};
+      if (content !== undefined) updates.content = content;
 
-    const post = await PostService.updatePost(
-      id,
-      req.user.id,
-      req.user.type,
-      updates
-    );
+      const post = await PostService.updatePost(
+        id,
+        req.user.id,
+        req.user.type,
+        updates
+      );
 
-    if (!post) {
-      return res.status(404).json({
+      if (!post) {
+        return res.status(404).json({
+          success: false,
+          message: 'Post not found or not authorized'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Post updated successfully',
+        data: post
+      });
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: 'Post not found or not authorized'
+        message: 'Error updating post',
+        error: error.message
       });
     }
-
-    res.json({
-      success: true,
-      message: 'Post updated successfully',
-      data: post
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error updating post',
-      error: error.message
-    });
   }
-}
-
 
   // Delete post
   static async deletePost(req, res) {

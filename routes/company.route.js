@@ -176,5 +176,66 @@ router.get('/all', authenticate, companyController.getAllCompanies);
  *         description: Job not found
  */
 router.delete('/jobs/:id', authenticate, isCompany, companyController.deleteJob);
-
+/**
+ * @swagger
+ * /api/companies/{id}:
+ *   get:
+ *     summary: Get public company profile by ID
+ *     description: Get company profile information (public access)
+ *     tags: [Companies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Company ID
+ *     responses:
+ *       200:
+ *         description: Company profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 location:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 website:
+ *                   type: string
+ *                 logo:
+ *                   type: string
+ *                 followers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       firstName:
+ *                         type: string
+ *                       lastName:
+ *                         type: string
+ *                       image:
+ *                         type: string
+ *                       headline:
+ *                         type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         description: Invalid Company ID
+ *       404:
+ *         description: Company not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/:id', companyController.getCompanyProfileById);
 module.exports = router;

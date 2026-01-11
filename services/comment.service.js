@@ -74,9 +74,9 @@ class CommentService {
     // Populate author
     let authorData = null;
     if (comment.author.type === 'User') {
-      authorData = await User.findById(comment.author.id).select('firstName lastName avatar logo');
+     authorData = await User.findById(comment.author.id).select('firstName lastName image');
     } else if (comment.author.type === 'Company') {
-      authorData = await Company.findById(comment.author.id).select('name avatar logo');
+      authorData = await Company.findById(comment.author.id).select('name logo');
     }
 
     // Add user's reaction if logged in
@@ -114,9 +114,9 @@ class CommentService {
         // Populate author
         let authorData = null;
         if (comment.author.type === 'User') {
-          authorData = await User.findById(comment.author.id).select('firstName lastName avatar logo');
+          authorData = await User.findById(comment.author.id).select('firstName lastName image');
         } else if (comment.author.type === 'Company') {
-          authorData = await Company.findById(comment.author.id).select('name avatar logo');
+          authorData = await Company.findById(comment.author.id).select('name logo');
         }
 
         let userReaction = null;
@@ -221,7 +221,7 @@ class CommentService {
         // Populate author
         let authorData = null;
         if (reply.author.type === 'User') {
-          authorData = await User.findById(reply.author.id).select('firstName lastName avatar logo');
+          authorData = await User.findById(reply.author.id).select('firstName lastName image');
         } else if (reply.author.type === 'Company') {
           authorData = await Company.findById(reply.author.id).select('name avatar logo');
         }

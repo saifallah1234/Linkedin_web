@@ -10,8 +10,8 @@ const { authenticate, isUser } = require('../middleware/auth');
  *   description: Notification endpoints
  */
 
-// Protect all notification routes (users only for now)
-router.use(authenticate, isUser);
+router.use(authenticate);
+//router.use(authenticate, isUser);
 
 // Get unread count
 router.get('/unread/count', notificationCtrl.getUnreadCount);
