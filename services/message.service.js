@@ -2,6 +2,7 @@ const Message = require('../models/message.model');
 const Notification = require('../models/notification.model');
 const User = require('../models/User.model');
 const Company = require('../models/Company.model');
+const mongoose = require("mongoose");
 
 
 // Send a message
@@ -153,11 +154,37 @@ exports.getChatHistory = async (user1, user2) => {
 };
 
 
+
+async function getParticipant(id) {
+  let user = await User.findById(id).select("firstName lastName image");
+  if (user) {
+    return {
+      id: user._id,
+      type: "User",
+      details: user
+    };
+  }
+
+  let company = await Company.findById(id).select("name logo");
+  if (company) {
+    return {
+      id: company._id,
+      type: "Company",
+      details: company
+    };
+  }
+
+  return null; // explicit
+}
+
+
 exports.getConversations = async (userId) => {
+  const me = new mongoose.Types.ObjectId(userId);
+
   const conversations = await Message.aggregate([
     {
       $match: {
-        $or: [{ senderId: userId }, { receiverId: userId }]
+        $or: [{ senderId: me }, { receiverId: me }]
       }
     },
     { $sort: { createdAt: -1 } },
@@ -175,13 +202,20 @@ exports.getConversations = async (userId) => {
     }
   ]);
 
-  // 🔥 ENRICH LAST MESSAGE SENDER
   for (const conv of conversations) {
     conv.lastMessage = await enrichMessage(conv.lastMessage);
+
+    const otherId = conv._id.u1.equals(me)
+      ? conv._id.u2
+      : conv._id.u1;
+
+    conv.participant = await getParticipant(otherId);
   }
 
   return conversations;
 };
+
+
 
 
 // Delete a whole conversation between two users
