@@ -13,7 +13,8 @@ const mongoose = require('mongoose');
  */
 
 // Protect all messaging routes (users only)
-router.use(authenticate, isUser);
+//router.use(authenticate, isUser);
+router.use(authenticate);
 
 // Add this middleware to parse multipart form data
 router.use(express.urlencoded({ extended: true }));
@@ -105,17 +106,20 @@ router.post(
     console.log('Files:', req.files);
     
     // Validate that receiverId is present (not recipientId)
-    if (!req.body.receiverId) {
-      console.log('ERROR: receiverId is missing');
+    if (!req.body.receiverId|| !req.body.receiverType) {
+      console.log('ERROR: receiverId and receiverType are missing');
       return res.status(400).json({ 
-        message: "receiverId is required" 
+        message: "receiverId and type is required" 
       });
     }
     
-    if (!req.body.content) {
-      console.log('ERROR: content is missing');
-      return res.status(400).json({ 
-        message: "content is required" 
+    const hasContent = req.body.content && req.body.content.trim().length > 0;
+    const hasFiles = req.files && req.files.length > 0;
+
+    if (!hasContent && !hasFiles) {
+      console.log('ERROR: message must have content or attachments');
+      return res.status(400).json({
+        message: "Message must contain text or at least one attachment"
       });
     }
     
@@ -132,16 +136,27 @@ router.post(
     
     // Process attachments
     if (req.files) {
-      req.body.attachments = req.files.map(file => ({
-        url: file.path,
-        type: file.mimetype.startsWith('image/')
-          ? 'image'
-          : file.mimetype.startsWith('video/')
-          ? 'video'
-          : 'file',
-        originalName: file.originalname
-      }));
+      req.body.attachments = req.files.map(file => {
+        let folder = "files";
+
+        if (file.mimetype.startsWith("image/")) {
+          folder = "images";
+        } else if (file.mimetype.startsWith("video/")) {
+          folder = "videos";
+        }
+
+        return {
+          url: `/uploads/${folder}/${file.filename}`,
+          type: file.mimetype.startsWith("image/")
+            ? "image"
+            : file.mimetype.startsWith("video/")
+            ? "video"
+            : "file",
+          originalName: file.originalname,
+        };
+      });
     }
+
     
     console.log('=== END MIDDLEWARE ===');
     next();

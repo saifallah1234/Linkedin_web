@@ -21,9 +21,12 @@ exports.getJobById = async (req, res) => {
 };
 
 // --- APPLICANT ACTIONS ---
-
 exports.applyToJob = async (req, res) => {
   try {
+    // Check if user exists in request (from auth middleware)
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
     const resumeFile = req.files?.resume?.[0];
     if (!resumeFile) return res.status(400).json({ message: 'Resume is required' });
 
@@ -44,15 +47,14 @@ exports.applyToJob = async (req, res) => {
       resumeUrl: resumeFile.path.replace(/\\/g, "/"), 
       additionalAttachment: attachmentData 
     };
-
-    const job = await jobService.applyToJob(req.params.id, req.user.id, applicationData);
-
-    res.status(201).json({ 
+    const result = await jobService.applyToJob(req.params.id, req.user.id, applicationData);
+    res.status(201).json({
       message: 'Application submitted successfully',
-      applicationId: job.applicants[job.applicants.length - 1]._id,
-      aiScore: job.applicants[job.applicants.length - 1].score,
-      matchPercentage: job.applicants[job.applicants.length - 1].matchPercentage
+      aiScore: result.applicant.score,
+      matchPercentage: result.applicant.matchPercentage,
+      aiFeedback: result.applicant.aiFeedback
     });
+
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -80,10 +82,22 @@ exports.createJob = async (req, res) => {
 
 exports.closeJob = async (req, res) => {
   try {
-    const job = await jobService.closeJob(req.params.id, req.user.id);
-    res.status(200).json({ message: "Job closed successfully", job });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const jobId = req.params.id;
+    const companyId = req.user.id;
+
+    const job = await jobService.closeJob(jobId, companyId);
+
+    res.json({
+      success: true,
+      message: "Job closed successfully",
+      job,
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -98,6 +112,7 @@ exports.updateApplicantStatus = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 // --- NEW AI SCORING ENDPOINTS ---
 

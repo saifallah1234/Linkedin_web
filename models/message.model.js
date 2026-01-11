@@ -10,19 +10,13 @@ const attachmentSchema = new mongoose.Schema({
 });
 
 const messageSchema = new mongoose.Schema({
-  senderId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
-  },
-  receiverId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
-  },
+  senderId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  senderType: { type: String, enum: ['User', 'Company'], required: true },
+  receiverId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  receiverType: { type: String, enum: ['User', 'Company'], required: true },
   content: { 
     type: String, 
-    required: true,
+    default: "",
     trim: true 
   },
   attachments: [attachmentSchema],
