@@ -136,16 +136,27 @@ router.post(
     
     // Process attachments
     if (req.files) {
-      req.body.attachments = req.files.map(file => ({
-        url: `/uploads/${file.filename}`,
-        type: file.mimetype.startsWith('image/')
-          ? 'image'
-          : file.mimetype.startsWith('video/')
-          ? 'video'
-          : 'file',
-        originalName: file.originalname
-      }));
+      req.body.attachments = req.files.map(file => {
+        let folder = "files";
+
+        if (file.mimetype.startsWith("image/")) {
+          folder = "images";
+        } else if (file.mimetype.startsWith("video/")) {
+          folder = "videos";
+        }
+
+        return {
+          url: `/uploads/${folder}/${file.filename}`,
+          type: file.mimetype.startsWith("image/")
+            ? "image"
+            : file.mimetype.startsWith("video/")
+            ? "video"
+            : "file",
+          originalName: file.originalname,
+        };
+      });
     }
+
     
     console.log('=== END MIDDLEWARE ===');
     next();
