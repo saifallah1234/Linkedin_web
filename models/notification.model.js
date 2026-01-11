@@ -86,4 +86,5 @@ const notificationSchema = new mongoose.Schema({
 // Index to quickly fetch a user's notifications (sorted by newest)
 notificationSchema.index({ 'receiver.id': 1, createdAt: -1 });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+module.exports =
+  mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
