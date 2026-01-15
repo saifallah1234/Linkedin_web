@@ -69,9 +69,9 @@ class PostService {
     // Populate author based on type
     let authorData = null;
     if (post.author.type === 'User') {
-      authorData = await User.findById(post.author.id).select('firstName lastName avatar logo email');
+      authorData = await User.findById(post.author.id).select('firstName lastName image email');
     } else if (post.author.type === 'Company') {
-      authorData = await Company.findById(post.author.id).select('name avatar logo email');
+      authorData = await Company.findById(post.author.id).select('name logo email');
     }
 
     const postObj = post.toObject();
@@ -237,11 +237,11 @@ class PostService {
           // Populate author based on type
           if (post.author.type === 'User') {
             authorData = await User.findById(post.author.id)
-              .select('firstName lastName image avatar logo')
+              .select('firstName lastName image logo')
               .lean();
           } else if (post.author.type === 'Company') {
             authorData = await Company.findById(post.author.id)
-              .select('name image avatar logo')
+              .select('name image  logo')
               .lean();
           }
           
@@ -308,7 +308,7 @@ class PostService {
 
     // Populate author details
     const Model = authorType === 'User' ? User : Company;
-    const authorData = await Model.findById(authorId).select('firstName lastName name avatar logo');
+    const authorData = await Model.findById(authorId).select('firstName lastName name image ');
 
     const postsWithAuthor = posts.map(post => {
       const postObj = post.toObject();
@@ -347,9 +347,9 @@ class PostService {
       posts.map(async (post) => {
         let authorData = null;
         if (post.author.type === 'User') {
-          authorData = await User.findById(post.author.id).select('firstName lastName avatar logo');
+          authorData = await User.findById(post.author.id).select('firstName lastName logo');
         } else if (post.author.type === 'Company') {
-          authorData = await Company.findById(post.author.id).select('name avatar logo');
+          authorData = await Company.findById(post.author.id).select('name logo');
         }
         const postObj = post.toObject();
         postObj.author.details = authorData;

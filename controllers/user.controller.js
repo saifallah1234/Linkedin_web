@@ -1,7 +1,9 @@
 const User = require('../models/User.model');
 const mongoose = require('mongoose');
 const JobOffer = require('../models/JobOffer.model');
-
+const Company = require('../models/Company.model');
+const Connection = require('../models/Connection.model');
+const fs = require('fs'); // Needed to delete old images if replaced
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -24,7 +26,6 @@ exports.getUserProfile = async (req, res) => {
   try {
     const userId= req.user.id;
 
-
     // 2. Find User
     // .select('-password') ensures password is never sent, even if select:false was missing
     // .populate(...) replaces the companyId with actual Company data (Name, Logo)
@@ -46,15 +47,9 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
-// ... existing imports
-const fs = require('fs'); // Needed to delete old images if replaced
-
-
 exports.updateUser = async (req, res) => {
   try {
     // --- 1. FIX: Extract ID correctly ---
-    // WRONG: const { id } = req.user.id; 
-    // RIGHT: Access .id directly. handle req.user._id or req.user.id
     let userId = req.user.id || req.user._id;
 
     // Fix the "Buffer" error: Force it to a string
@@ -119,9 +114,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-
-const Company = require('../models/Company.model'); // Don't forget to import Company!
-
 exports.followCompany = async (req, res) => {
   try {
     const userId = req.user.id;        // From Token (or Mock Middleware)
@@ -134,7 +126,6 @@ exports.followCompany = async (req, res) => {
     }
 
     // 2. Check if User is already following this company
-    // We look for a user who matches BOTH the userId AND has this companyId in their list
     const userAlreadyFollowing = await User.findOne({
       _id: userId,
       'followingCompanies.companyId': companyId
@@ -145,17 +136,16 @@ exports.followCompany = async (req, res) => {
     }
 
     // 3. Add to User's "followingCompanies" array
-    // We use $push to add the new object
     await User.findByIdAndUpdate(userId, {
       $push: {
         followingCompanies: {
           companyId: companyId,
-          followedAt: new Date() // Add timestamp if your schema supports it
+          followedAt: new Date()
         }
       }
     });
     await Company.findByIdAndUpdate(companyId, {
-      $addToSet: { followers: userId } // Add the User ID to the Company
+      $addToSet: { followers: userId }
     });
 
     res.json({ message: `You are now following ${company.name}` });
@@ -172,12 +162,11 @@ exports.unfollowCompany = async (req, res) => {
     const companyId = req.params.id; // From URL
 
     // --- Perform Unfollow ---
-    // $pull removes the object from the array where 'companyId' matches the ID provided
     const user = await User.findByIdAndUpdate(userId, {
       $pull: { 
         followingCompanies: { companyId: companyId } 
       }
-    }, { new: true }); // Return the updated user
+    }, { new: true });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -188,7 +177,6 @@ exports.unfollowCompany = async (req, res) => {
 
     res.json({ 
       message: 'Unfollowed company successfully',
-      // Optional: return the updated list so frontend can update immediately
       followingCompanies: user.followingCompanies 
     });
 
@@ -200,17 +188,16 @@ exports.unfollowCompany = async (req, res) => {
 
 exports.getFollowingList = async (req, res) => {
   try {
-    const userId = req.user.id; // From Token
+    const userId = req.user.id;
     console.log(userId)
     const user = await User.findById(userId)
-      .select('followingCompanies') // We only need this field
-      .populate('followingCompanies.companyId', 'name logo location website'); // Get real company details
+      .select('followingCompanies')
+      .populate('followingCompanies.companyId', 'name logo location website');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Return just the array to make it easier for frontend
     res.json(user.followingCompanies);
 
   } catch (error) {
@@ -239,7 +226,6 @@ exports.getPublicProfile = async (req, res) => {
 };
 
 // Get suggestions for users to follow (companies) and users to connect with
-const Connection = require('../models/Connection.model');
 exports.getSuggestions = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -334,20 +320,23 @@ exports.deleteExperience = async (req, res) => {
   try {
     const userId = req.user.id;
     const expId = req.params.id;
-    const user = await User.findById(userId);
+    
+    // Use $pull operator to remove the experience
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { experiences: { _id: expId } } },
+      { new: true }
+    );
+    
     if (!user) return res.status(404).json({ message: 'User not found' });
-
-    const exp = user.experiences.id(expId);
-    if (!exp) return res.status(404).json({ message: 'Experience not found' });
-
-    exp.remove();
-    await user.save();
+    
     res.json({ message: 'Experience removed' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
+
 exports.getUserSuggestions = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -452,7 +441,7 @@ exports.getActiveJobs = async (req, res) => {
     const jobs = await JobOffer.find({
       _id: { $nin: appliedJobIds },
       isActive: true,
-      deadline: { $gt: now } // Jobs not expired
+      deadline: { $gt: now }
     })
       .populate('companyId', 'name logo location')
       .sort({ createdAt: -1 })
@@ -499,7 +488,7 @@ exports.getExpiringJobs = async (req, res) => {
       }
     })
       .populate('companyId', 'name logo location')
-      .sort({ deadline: 1 }) // Sort by closest deadline
+      .sort({ deadline: 1 })
       .limit(limit)
       .lean();
 
@@ -558,6 +547,7 @@ exports.getHiringCompanies = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 // Projects
 exports.addProject = async (req, res) => {
   try {
@@ -566,7 +556,11 @@ exports.addProject = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.projects.push({ title, link, technologies: Array.isArray(technologies) ? technologies : (technologies ? JSON.parse(technologies) : []) });
+    user.projects.push({ 
+      title, 
+      link, 
+      technologies: Array.isArray(technologies) ? technologies : (technologies ? JSON.parse(technologies) : []) 
+    });
     await user.save();
     const added = user.projects[user.projects.length - 1];
     res.status(201).json(added);
@@ -603,14 +597,16 @@ exports.deleteProject = async (req, res) => {
   try {
     const userId = req.user.id;
     const projId = req.params.id;
-    const user = await User.findById(userId);
+    
+    // Use $pull operator to remove the project
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { projects: { _id: projId } } },
+      { new: true }
+    );
+    
     if (!user) return res.status(404).json({ message: 'User not found' });
-
-    const proj = user.projects.id(projId);
-    if (!proj) return res.status(404).json({ message: 'Project not found' });
-
-    proj.remove();
-    await user.save();
+    
     res.json({ message: 'Project removed' });
   } catch (error) {
     console.error(error);
@@ -660,14 +656,16 @@ exports.deleteSkill = async (req, res) => {
   try {
     const userId = req.user.id;
     const skillId = req.params.id;
-    const user = await User.findById(userId);
+    
+    // Use $pull operator to remove the skill
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { skills: { _id: skillId } } },
+      { new: true }
+    );
+    
     if (!user) return res.status(404).json({ message: 'User not found' });
-
-    const skill = user.skills.id(skillId);
-    if (!skill) return res.status(404).json({ message: 'Skill not found' });
-
-    skill.remove();
-    await user.save();
+    
     res.json({ message: 'Skill removed' });
   } catch (error) {
     console.error(error);
@@ -679,12 +677,23 @@ exports.deleteSkill = async (req, res) => {
 exports.addCertificate = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, obtainedAt } = req.body;
-    if (!name) return res.status(400).json({ message: 'Certificate name required' });
+    const { name, issuer, issueDate, expiryDate, url } = req.body;
+    
+    if (!name || !issuer) {
+      return res.status(400).json({ message: 'Certificate name and issuer are required' });
+    }
+    
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.certificates.push({ name, obtainedAt });
+    user.certificates.push({ 
+      name, 
+      issuer, 
+      issueDate,
+      expiryDate, 
+      url 
+    });
+    
     await user.save();
     const added = user.certificates[user.certificates.length - 1];
     res.status(201).json(added);
@@ -717,14 +726,16 @@ exports.deleteCertificate = async (req, res) => {
   try {
     const userId = req.user.id;
     const certId = req.params.id;
-    const user = await User.findById(userId);
+    
+    // Use $pull operator to remove the certificate
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { certificates: { _id: certId } } },
+      { new: true }
+    );
+    
     if (!user) return res.status(404).json({ message: 'User not found' });
-
-    const cert = user.certificates.id(certId);
-    if (!cert) return res.status(404).json({ message: 'Certificate not found' });
-
-    cert.remove();
-    await user.save();
+    
     res.json({ message: 'Certificate removed' });
   } catch (error) {
     console.error(error);
@@ -840,9 +851,9 @@ exports.generateResumePDF = async (req, res) => {
       
       user.certificates.forEach((cert, idx) => {
         doc.font('Helvetica').fontSize(10).text(`• ${cert.name}`);
-        if (cert.obtainedAt) {
-          const obtainedDate = new Date(cert.obtainedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-          doc.fontSize(9).fillColor('#666').text(`  Obtained: ${obtainedDate}`);
+        if (cert.issueDate) {
+          const issueDate = new Date(cert.issueDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+          doc.fontSize(9).fillColor('#666').text(`  Issued: ${issueDate}`);
           doc.fillColor('#000');
         }
       });
