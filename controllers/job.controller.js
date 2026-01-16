@@ -11,6 +11,30 @@ exports.getAllJobs = async (req, res) => {
   }
 };
 
+// job.controller.js
+exports.getPublicCompanyJobs = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+
+    const jobs = await jobService.getCompanyJobsByCompanyId(companyId, {
+      onlyActive: true, //  important
+    });
+
+    res.status(200).json({
+      success: true,
+      data: jobs,
+    });
+  } catch (error) {
+    console.error("Error fetching public company jobs:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch company jobs",
+    });
+  }
+};
+
+
+
 exports.getJobById = async (req, res) => {
   try {
     const job = await jobService.getJobById(req.params.id);

@@ -335,6 +335,23 @@ router.post('/:id/rescore', authenticate, isCompany, jobCtrl.rescoreApplicants);
  */
 router.get('/:id/statistics', authenticate, isCompany, jobCtrl.getJobStatistics);
 
+/**
+ * @swagger
+ * /api/jobs/companies/{companyId}/jobs:
+ *   get:
+ *     summary: Get public company jobs
+ *     tags: [Jobs]
+ *     parameters:
+ *       - in: path
+ *         name: companyId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 
-
+router.get('/companies/:companyId/jobs', jobCtrl.getPublicCompanyJobs);
 module.exports = router;
+

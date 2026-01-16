@@ -234,3 +234,20 @@ exports.getJobStatistics = async (jobId) => {
     }
   };
 };
+// job.service.js
+exports.getCompanyJobsByCompanyId = async (companyId, options = {}) => {
+  const query = {
+    companyId,
+  };
+
+  // public profile sees ONLY active jobs
+  if (options.onlyActive) {
+    query.isActive = true;
+  }
+
+  return JobOffer.find(query)
+    .sort({ createdAt: -1 })
+    .populate("companyId", "name logo location")
+    .lean();
+};
+
