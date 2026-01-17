@@ -6,10 +6,10 @@ const notificationService = require('../services/notification.service');
 const { generateJobDescription, enhanceJobDescription } = require('../utils/jobDescriptionAI');
 const { generateApplicantScore, updateAllApplicantScores } = require('../utils/aiScoring');
 
-// Fix: Correct argument order (companyId first)
+
 exports.createJob = async (companyId, data) => {
   let finalDescription = data.description;
-  const shouldUseAI = data.generateWithAI; // Boolean flag from frontend
+  const shouldUseAI = data.generateWithAI; 
   
   // If AI generation is requested
   if (shouldUseAI) {
@@ -29,7 +29,7 @@ exports.createJob = async (companyId, data) => {
       }
     } catch (aiError) {
       console.error('AI description generation failed:', aiError);
-      // Continue with original description if AI fails
+      
     }
   }
   
@@ -87,7 +87,7 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
     experienceLevel: job.experienceLevel || 'mid',
     type: job.type,
     location: job.location,
-    companyName: 'Unknown Company' // Will be populated if needed
+    companyName: 'Unknown Company' 
   };
 
   // Generate AI score
@@ -122,7 +122,7 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
 
   await job.save();
 
-  // Handle message and notification separately - don't fail the application if these fail
+  
   try {
       await messageService.sendMessage(
         userId.toString(),
@@ -184,7 +184,7 @@ exports.closeJob = async (jobId, companyId) => {
 
   return job;
 };
-// New function: Get top candidates for a job
+// Get top candidates for a job
 exports.getTopCandidates = async (jobId, limit = 10) => {
   const job = await JobOffer.findById(jobId)
     .populate({
@@ -204,13 +204,13 @@ exports.getTopCandidates = async (jobId, limit = 10) => {
   return sortedApplicants;
 };
 
-// New function: Re-score all applicants for a job
+
 exports.rescoreApplicants = async (jobId) => {
   const result = await updateAllApplicantScores(jobId);
   return result;
 };
 
-// New function: Get job statistics
+
 exports.getJobStatistics = async (jobId) => {
   const job = await JobOffer.findById(jobId).lean();
   
@@ -234,13 +234,14 @@ exports.getJobStatistics = async (jobId) => {
     }
   };
 };
-// job.service.js
+
+
 exports.getCompanyJobsByCompanyId = async (companyId, options = {}) => {
   const query = {
     companyId,
   };
 
-  // public profile sees ONLY active jobs
+  
   if (options.onlyActive) {
     query.isActive = true;
   }

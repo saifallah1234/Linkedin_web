@@ -35,7 +35,7 @@ exports.sendMessage = async (sender, receiver, content, attachments = []) => {
 
     } catch (error) {
         console.error("Failed to create notification:", error);
-        // Don't fail the message if notification fails
+        
     }
 
     return message;
@@ -52,7 +52,7 @@ async function enrichMessage(message) {
       .select('name logo');
   }
 
-  //  SAFE: works for both aggregate + find()
+  
   const msgObj = message.toObject ? message.toObject() : { ...message };
 
   msgObj.sender = {
@@ -101,7 +101,7 @@ async function getParticipant(id) {
     };
   }
 
-  return null; // explicit
+  return null; 
 }
 
 
@@ -145,7 +145,7 @@ exports.getConversations = async (userId) => {
 
 
 
-// Delete a whole conversation between two users
+
 exports.deleteConversation = async (userId, otherUserId) => {
     return await Message.deleteMany({
         $or: [

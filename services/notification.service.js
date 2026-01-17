@@ -8,7 +8,7 @@ const Notification = require('../models/Notification.model');
  */
 exports.createNotification = async (receiver, sender, type, entity) => {
   try {
-    // Don't notify if the sender is the same as the receiver
+    
     if (receiver.id.toString() === sender.id.toString()) return;
 
     return await Notification.create({
@@ -28,8 +28,8 @@ exports.getUserNotifications = async (userId, page = 1, limit = 20) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .populate('sender.id') // Dynamically populates based on sender.type
-    .populate('entity.id'); // Dynamically populates based on entity.type
+    .populate('sender.id') 
+    .populate('entity.id'); 
 };
 
 exports.getUnreadCount = async (userId) => {
