@@ -12,10 +12,10 @@ const applicantSchema = new mongoose.Schema({
     required: true 
   },
   
-  // [NEW] Optional field for Video CV, Portfolio, or Cover Letter
+  //  Optional field for Video CV, Portfolio, or Cover Letter
   additionalAttachment: {
     path: {
-        type: String // ex: uploads/videos/video1.mp4
+        type: String // kima : uploads/videos/video1.mp4
     },
      type: {
         type: String,
@@ -72,11 +72,8 @@ const jobOfferSchema = new mongoose.Schema({
   },
   applicants: [applicantSchema],
 
-  // createdAt: { 
-  //   type: Date, 
-  //   default: Date.now 
-  // }
-},{ timestamps: true });//a Mongoose option that automatically addscreatedAt et updatedAt
+  
+},{ timestamps: true });
 
 jobOfferSchema.index({ location: 1, type: 1 });
 

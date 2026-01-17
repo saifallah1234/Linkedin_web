@@ -2,7 +2,6 @@ const notificationService = require('../services/notification.service');
 
 exports.getNotifications = async (req, res) => {
   try {
-    // req.user.id comes from your auth middleware
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const notifications = await notificationService.getUserNotifications(req.user.id, page, limit);

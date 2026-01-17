@@ -44,7 +44,7 @@ const notificationSchema = new mongoose.Schema({
       'connection_accepted',
       'job_application',
       'company_post',
-      'MESSAGE' // ← ADD THIS
+      'MESSAGE' 
     ]
   },
   
@@ -75,7 +75,6 @@ const notificationSchema = new mongoose.Schema({
     default: false 
   },
 
-  // --- Manual Timestamp ---
   createdAt: { 
     type: Date, 
     default: Date.now 

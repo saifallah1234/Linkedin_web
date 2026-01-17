@@ -5,16 +5,15 @@ exports.send = async (req, res) => {
         console.log('=== CONTROLLER ===');
         console.log('req.user.id:', req.user.id);
         console.log('req.body.receiverId:', req.body.receiverId);
-        console.log('req.body.receiverType:', req.body.receiverType); // Add this log
+        console.log('req.body.receiverType:', req.body.receiverType); 
         console.log('req.body.content:', req.body.content);
         console.log('req.body.attachments:', req.body.attachments);
         
-        const { receiverId, receiverType, content, attachments } = req.body; // Add receiverType
+        const { receiverId, receiverType, content, attachments } = req.body;
         
-        // receiverId should already be converted to ObjectId by middleware
         const msg = await messageService.sendMessage(
             { id: req.user.id, type: req.user.type },
-            { id: receiverId, type: receiverType }, // Now receiverType is defined
+            { id: receiverId, type: receiverType }, 
             content || "", 
             attachments || []
         );

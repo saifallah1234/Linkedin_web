@@ -11,13 +11,13 @@ exports.getAllJobs = async (req, res) => {
   }
 };
 
-// job.controller.js
+
 exports.getPublicCompanyJobs = async (req, res) => {
   try {
     const { companyId } = req.params;
 
     const jobs = await jobService.getCompanyJobsByCompanyId(companyId, {
-      onlyActive: true, //  important
+      onlyActive: true, 
     });
 
     res.status(200).json({
@@ -47,7 +47,6 @@ exports.getJobById = async (req, res) => {
 // --- APPLICANT ACTIONS ---
 exports.applyToJob = async (req, res) => {
   try {
-    // Check if user exists in request (from auth middleware)
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: 'User not authenticated' });
     }
@@ -88,10 +87,8 @@ exports.applyToJob = async (req, res) => {
 
 exports.createJob = async (req, res) => {
   try {
-    // Extract AI flag from request body
     const { generateWithAI, ...jobData } = req.body;
     
-    // Prepare data for service
     const dataToSend = {
       ...jobData,
       generateWithAI: generateWithAI === 'true' || generateWithAI === true

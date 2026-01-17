@@ -26,7 +26,6 @@ const messageSchema = new mongoose.Schema({
     default: false 
   },
 
-  // --- Manual Timestamp ---
   createdAt: { type: Date, default: Date.now }
 });
 
