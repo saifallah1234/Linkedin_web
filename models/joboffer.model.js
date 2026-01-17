@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-
-// --- 1. Sub-Schema for Applicants ---
 const applicantSchema = new mongoose.Schema({
   userId: { 
     type: mongoose.Schema.Types.ObjectId, 
@@ -11,11 +9,9 @@ const applicantSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  
-  //  Optional field for Video CV, Portfolio, or Cover Letter
   additionalAttachment: {
     path: {
-        type: String // kima : uploads/videos/video1.mp4
+        type: String
     },
      type: {
         type: String,
@@ -37,8 +33,6 @@ const applicantSchema = new mongoose.Schema({
     default: Date.now 
   }
 });
-
-// --- 2. Main Job Offer Schema ---
 const jobOfferSchema = new mongoose.Schema({
   companyId: { 
     type: mongoose.Schema.Types.ObjectId, 
@@ -64,8 +58,6 @@ const jobOfferSchema = new mongoose.Schema({
   salaryRange: { type: String, required: true },
   startDate: { type: Date },
   deadline: { type: Date },
-
-  //Instead of deleting a job offer, you close it.
   isActive: { 
     type: Boolean, 
     default: true 

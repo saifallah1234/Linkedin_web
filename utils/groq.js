@@ -1,9 +1,7 @@
-const Groq = require('groq-sdk'); // correct package
+const Groq = require('groq-sdk'); 
 const groqClient = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
-
-// Generate AI-powered content for a post
 async function generatePostContent(content, maxTokens = 300) {
   if (!content || content.trim() === "") return "";
 
@@ -29,8 +27,8 @@ Return only the enhanced content.
 
     return completion.choices[0].message.content.trim();
   } catch (err) {
-    console.error("❌ Groq API error:", err);
-    return content; // fallback
+    console.error("Groq API error:", err);
+    return content;
   }
 }
 

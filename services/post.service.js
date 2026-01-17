@@ -7,7 +7,6 @@ const Company = require('../models/Company.model');
 const notificationService = require('./notification.service');
 
 class PostService {
-  // Create a new post
   static async createPost(authorId, authorType, content, media = []) {
     const post = new Post({
       author: {
@@ -22,11 +21,8 @@ class PostService {
     });
     
     const saved = await post.save();
-
-    // Notify relevant users
     try {
       if (authorType === 'User') {
-        // Notify accepted connections
         const connections = await Connection.find({
           status: 'ACCEPTED',
           $or: [ { requesterId: authorId }, { receiverId: authorId } ]
@@ -42,7 +38,6 @@ class PostService {
           );
         }
       } else if (authorType === 'Company') {
-        // Notify followers (users who have this company in followingCompanies)
         const followers = await User.find({ 'followingCompanies.companyId': authorId }).select('_id');
         for (const f of followers) {
           await notificationService.createNotification(
@@ -59,14 +54,10 @@ class PostService {
 
     return saved;
   }
-
-  // Get post by ID with author details
   static async getPostById(postId, currentUserId = null) {
     const post = await Post.findById(postId);
 
     if (!post) return null;
-
-    // Populate author based on type
     let authorData = null;
     if (post.author.type === 'User') {
       authorData = await User.findById(post.author.id).select('firstName lastName image email');
@@ -76,8 +67,6 @@ class PostService {
 
     const postObj = post.toObject();
     postObj.author.details = authorData;
-
-    // Add user's reaction if logged in
     if (currentUserId) {
       const userReaction = await Reaction.findOne({
         'target.id': post._id,
@@ -89,8 +78,6 @@ class PostService {
 
     return postObj;
   }
-
-  // Update post
   static async updatePost(postId, authorId, authorType, updates) {
     const post = await Post.findOne({
       _id: postId,
@@ -105,8 +92,6 @@ class PostService {
 
     return await post.save();
   }
-
-  // Delete post
   static async deletePost(postId, authorId, authorType) {
     const post = await Post.findOne({
       _id: postId,
@@ -117,24 +102,16 @@ class PostService {
     if (!post) return null;
 
     await Post.findByIdAndDelete(postId);
-    
-    // Also delete all comments on this post
     await Comment.deleteMany({ postId: postId });
-    
-    // Delete all reactions to this post
     await Reaction.deleteMany({ 'target.id': postId, 'target.type': 'Post' });
 
     return post;
   }
-
-  // Get user's feed (connections + followed companies)
   static async getUserFeed(userId, page = 1, limit = 10) {
   try {
     const skip = (page - 1) * limit;
     
     console.log('DEBUG - Getting feed for user:', userId);
-
-    // Get user's ACCEPTED connections
     const connections = await Connection.find({
       status: 'ACCEPTED',
       $or: [
@@ -144,8 +121,6 @@ class PostService {
     });
 
     console.log('DEBUG - Found connections:', connections.length);
-
-    // Extract connected user IDs
     const connectedUserIds = connections.map(conn => {
       const requesterIdStr = conn.requesterId.toString();
       const receiverIdStr = conn.receiverId.toString();
@@ -159,39 +134,26 @@ class PostService {
     });
 
     console.log('DEBUG - Connected user IDs:', connectedUserIds.map(id => id.toString()));
-
-    // Get user WITH followingCompanies (array of objects)
     const user = await User.findById(userId).select('followingCompanies');
-    
-    // Extract just the company IDs from the followingCompanies array
     const followedCompanyIds = user?.followingCompanies?.map(item => item.companyId) || [];
     
     console.log('DEBUG - Following companies:', user?.followingCompanies);
     console.log('DEBUG - Followed company IDs:', followedCompanyIds.map(id => id.toString()));
-
-    // Include the user's own ID to see their own posts in the feed
     const allAuthorIds = [
       userId,
       ...connectedUserIds
     ];
 
     console.log('DEBUG - All author IDs to fetch:', allAuthorIds.map(id => id.toString()));
-
-    // Build query - handle empty arrays properly
     const queryConditions = [
-      { 'author.id': userId, 'author.type': 'User' } // Always include own posts
+      { 'author.id': userId, 'author.type': 'User' } 
     ];
-
-    // Add connected users condition if there are any
     if (connectedUserIds.length > 0) {
       queryConditions.push({ 
         'author.id': { $in: connectedUserIds }, 
         'author.type': 'User' 
       });
     }
-
-    // Add followed companies condition if there are any
-    // NOTE: Now using followedCompanyIds instead of followedCompanies
     if (followedCompanyIds.length > 0) {
       queryConditions.push({ 
         'author.id': { $in: followedCompanyIds }, 
@@ -202,8 +164,6 @@ class PostService {
     const postsQuery = queryConditions.length > 0 ? { $or: queryConditions } : {};
 
     console.log('DEBUG - Posts query:', JSON.stringify(postsQuery, null, 2));
-
-    // If no query conditions (no connections, no followed companies), return empty
     if (Object.keys(postsQuery).length === 0) {
       return {
         posts: [],
@@ -215,8 +175,6 @@ class PostService {
         }
       };
     }
-
-    // Fetch posts
     const posts = await Post.find(postsQuery)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -224,17 +182,11 @@ class PostService {
       .lean();
 
     console.log('DEBUG - Found posts:', posts.length);
-
-    // Get total count for pagination
     const total = await Post.countDocuments(postsQuery);
-
-    // Populate author details and reactions for each post
     const postsWithReactions = await Promise.all(
       posts.map(async (post) => {
         try {
           let authorData = null;
-          
-          // Populate author based on type
           if (post.author.type === 'User') {
             authorData = await User.findById(post.author.id)
               .select('firstName lastName image logo')
@@ -245,7 +197,6 @@ class PostService {
               .lean();
           }
           
-          // Get user's reaction to this post
           const userReaction = await Reaction.findOne({
             'target.id': post._id,
             'target.type': 'Post',
@@ -288,8 +239,6 @@ class PostService {
     throw error;
   }
 }
-
-  // Get posts by author
   static async getPostsByAuthor(authorId, authorType, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
 
@@ -305,8 +254,6 @@ class PostService {
       'author.id': authorId,
       'author.type': authorType
     });
-
-    // Populate author details
     const Model = authorType === 'User' ? User : Company;
     const authorData = await Model.findById(authorId).select('firstName lastName name image ');
 
@@ -326,8 +273,6 @@ class PostService {
       }
     };
   }
-
-  // Search posts
   static async searchPosts(query, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
 
@@ -341,8 +286,6 @@ class PostService {
     const total = await Post.countDocuments({
       content: { $regex: query, $options: 'i' }
     });
-
-    // Populate author details for each post
     const postsWithAuthor = await Promise.all(
       posts.map(async (post) => {
         let authorData = null;

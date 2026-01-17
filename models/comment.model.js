@@ -7,7 +7,6 @@ const commentSchema = new mongoose.Schema({
     required: true 
   },
 
-  // --- POLYMORPHIC AUTHOR ---
   author: {
     id: { 
       type: mongoose.Schema.Types.ObjectId, 
@@ -21,9 +20,6 @@ const commentSchema = new mongoose.Schema({
       default: 'User'
     }
   },
-
-  // --- THREADING (Replies) ---
-  // If null, it's a main comment. If set, it's a reply to another comment.
   parentCommentId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Comment', 
@@ -41,11 +37,7 @@ const commentSchema = new mongoose.Schema({
     default: Date.now 
   }
 });
-
-// Index 1: Quickly load all comments for a specific post
 commentSchema.index({ postId: 1, createdAt: 1 });
-
-// Index 2: Quickly load replies for a specific comment
 commentSchema.index({ parentCommentId: 1 });
 
 module.exports = mongoose.model('Comment', commentSchema);

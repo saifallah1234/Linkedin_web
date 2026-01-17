@@ -5,12 +5,8 @@ const mongoose = require('mongoose');
 const notificationService = require('./notification.service');
 
 class ReactionService {
-  // Add or update reaction
   static async addReaction(userId, targetType, targetId, reactionType) {
-    // Convert targetType to capitalized form for model
     const modelType = targetType.charAt(0).toUpperCase() + targetType.slice(1);
-
-    // Check if target exists
     let target;
     if (targetType === 'Post') {
       target = await Post.findById(targetId);
@@ -21,8 +17,6 @@ class ReactionService {
     if (!target) {
       throw new Error(`${targetType} not found`);
     }
-
-    // Check for existing reaction
     const existingReaction = await Reaction.findOne({
       'target.id': targetId,
       'target.type': modelType,
@@ -30,10 +24,8 @@ class ReactionService {
     });
 
     if (existingReaction) {
-      // If same reaction type, remove it (toggle off)
       if (existingReaction.reactionType === reactionType) {
         await Reaction.findByIdAndDelete(existingReaction._id);
-        // decrement likesCount on target synchronously
         if (modelType === 'Post') {
           await Post.findByIdAndUpdate(targetId, { $inc: { likesCount: -1 } });
         } else if (modelType === 'Comment') {
@@ -41,13 +33,11 @@ class ReactionService {
         }
         return null;
       } else {
-        // Different reaction type, update it (no change to total count)
         existingReaction.reactionType = reactionType;
         await existingReaction.save();
         return existingReaction;
       }
     } else {
-      // Create new reaction
       const reaction = new Reaction({
         target: {
           id: targetId,
@@ -58,14 +48,12 @@ class ReactionService {
       });
 
       await reaction.save();
-      // increment likesCount on target synchronously
       if (modelType === 'Post') {
         await Post.findByIdAndUpdate(targetId, { $inc: { likesCount: 1 } });
       } else if (modelType === 'Comment') {
         await Comment.findByIdAndUpdate(targetId, { $inc: { likesCount: 1 } });
       }
       try {
-        // Notify the target author
         let targetAuthor = null;
         if (targetType === 'Post') {
           const p = await Post.findById(targetId).select('author');
@@ -90,7 +78,6 @@ class ReactionService {
     }
   }
 
-  // Remove reaction
   static async removeReaction(userId, targetType, targetId) {
     const modelType = targetType.charAt(0).toUpperCase() + targetType.slice(1);
 
@@ -101,7 +88,6 @@ class ReactionService {
     });
 
     if (reaction) {
-      // decrement likesCount on the target
       if (modelType === 'Post') {
         await Post.findByIdAndUpdate(targetId, { $inc: { likesCount: -1 } });
       } else if (modelType === 'Comment') {
@@ -112,7 +98,6 @@ class ReactionService {
     return reaction;
   }
 
-  // Get reactions for a target
   static async getReactions(targetType, targetId, page = 1, limit = 20) {
     const skip = (page - 1) * limit;
     const modelType = targetType.charAt(0).toUpperCase() + targetType.slice(1);
@@ -145,8 +130,6 @@ class ReactionService {
       }
     };
   }
-
-  // Get user's reaction on a target
   static async getUserReaction(userId, targetType, targetId) {
     const modelType = targetType.charAt(0).toUpperCase() + targetType.slice(1);
 
@@ -156,15 +139,13 @@ class ReactionService {
       userId: userId
     });
   }
-
-  // Get reaction statistics
   static async getReactionStats(targetType, targetId) {
     const modelType = targetType.charAt(0).toUpperCase() + targetType.slice(1);
 
     const stats = await Reaction.aggregate([
         {
             $match: {
-                'target.id': new mongoose.Types.ObjectId(targetId), // FIXED: Use new keyword
+                'target.id': new mongoose.Types.ObjectId(targetId), 
                 'target.type': modelType
             }
         },
@@ -175,8 +156,6 @@ class ReactionService {
             }
         }
     ]);
-
-    // Convert to object with default values
     const result = {};
     Object.keys(this.reactionTypes).forEach(type => {
         result[type] = 0;

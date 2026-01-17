@@ -14,8 +14,6 @@ exports.sendMessage = async (sender, receiver, content, attachments = []) => {
         content,
         attachments
     });
-
-        // Create a notification for the receiver - FIXED PARAMETERS
     try {
         await Notification.create({
             receiver: {
@@ -79,9 +77,6 @@ exports.getChatHistory = async (user1, user2) => {
 
   return Promise.all(messages.map(enrichMessage));
 };
-
-
-
 async function getParticipant(id) {
   let user = await User.findById(id).select("firstName lastName image");
   if (user) {

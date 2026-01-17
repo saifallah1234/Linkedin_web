@@ -29,14 +29,9 @@ exports.getCompanyProfileById = async (req, res) => {
 
 exports.getAllCompanies = async (req, res) => {
   try {
-    // 1. Find all companies
-    // .select('-password') ensures security
-    // .sort({ name: 1 }) sorts them alphabetically (optional)
     const companies = await Company.find()
       .select('-password')
       .sort({ name: 1 }); 
-
-    // 2. Send Data
     res.json(companies);
 
   } catch (error) {
@@ -72,15 +67,10 @@ exports.getCompanyProfile = async (req, res) => {
 exports.updateCompany = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // First, find the company to check ownership
     const company = await Company.findById(id);
     if (!company) {
       return res.status(404).json({ message: 'Company not found' });
     }
-
-    // Check if the authenticated user is the owner of this company
-    // Compare IDs as strings to avoid ObjectId vs string mismatch
     if (req.user.id.toString() !== company._id.toString() && req.user.id.toString() !== company.ownerId?.toString()) {
       return res.status(403).json({ message: 'You can only update your own company profile' });
     }

@@ -272,7 +272,7 @@ router.post(
  *                   type: object
  *                   description: Only present when accountType is "company"
  */
-router.get('/session', authController.getCurrentSession);
+router.get('/session',authController.getCurrentSession);
 /**
  * @swagger
  * /signup/company:

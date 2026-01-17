@@ -28,9 +28,6 @@ const messageSchema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now }
 });
-
-// --- Performance Index ---
-// Speeds up fetching the chat history between two specific users
 messageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Message', messageSchema);

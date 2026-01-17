@@ -10,18 +10,14 @@ const { generateApplicantScore, updateAllApplicantScores } = require('../utils/a
 exports.createJob = async (companyId, data) => {
   let finalDescription = data.description;
   const shouldUseAI = data.generateWithAI; 
-  
-  // If AI generation is requested
-  if (shouldUseAI) {
+    if (shouldUseAI) {
     try {
       if (!data.description || data.description.trim() === "") {
-        // Generate completely new description
         const aiDescription = await generateJobDescription(data);
         if (aiDescription) {
           finalDescription = aiDescription;
         }
       } else {
-        // Enhance existing description
         const enhancedDescription = await enhanceJobDescription(data.description, data);
         if (enhancedDescription) {
           finalDescription = enhancedDescription;
@@ -32,13 +28,10 @@ exports.createJob = async (companyId, data) => {
       
     }
   }
-  
-  // Create job with final description
   return JobOffer.create({ 
     ...data, 
     companyId, 
     description: finalDescription,
-    // Remove the AI flag from the stored data
     generateWithAI: undefined 
   });
 };
@@ -78,7 +71,6 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
 
   if (!user) throw new Error('User not found');
 
-  // Prepare job details for AI
   const jobDetails = {
     title: job.title,
     description: job.description,
@@ -90,7 +82,6 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
     companyName: 'Unknown Company' 
   };
 
-  // Generate AI score
   let aiScore = 0;
   let aiFeedback = '';
   let matchPercentage = 0;
@@ -102,14 +93,12 @@ exports.applyToJob = async (jobId, userId, applicationData) => {
     matchPercentage = aiEvaluation.matchPercentage || aiScore;
   } catch (aiError) {
     console.error('AI scoring failed, using fallback:', aiError);
-    // Use fallback scoring
     const { calculateFallbackScore } = require('../utils/aiScoring');
     aiScore = calculateFallbackScore(user, jobDetails);
     matchPercentage = aiScore;
     aiFeedback = 'AI evaluation temporarily unavailable. Score based on profile matching.';
   }
 
-  // Add applicant with AI score
   job.applicants.push({
     userId,
     resumeUrl: applicationData.resumeUrl,
@@ -184,7 +173,6 @@ exports.closeJob = async (jobId, companyId) => {
 
   return job;
 };
-// Get top candidates for a job
 exports.getTopCandidates = async (jobId, limit = 10) => {
   const job = await JobOffer.findById(jobId)
     .populate({
@@ -195,7 +183,6 @@ exports.getTopCandidates = async (jobId, limit = 10) => {
 
   if (!job || !job.applicants) return [];
 
-  // Sort applicants by score (highest first)
   const sortedApplicants = [...job.applicants]
     .filter(app => app.score > 0)
     .sort((a, b) => b.score - a.score)

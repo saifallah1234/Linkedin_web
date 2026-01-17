@@ -1,7 +1,4 @@
 const jobService = require('../services/job.service');
-
-// --- PUBLIC / GENERAL ---
-
 exports.getAllJobs = async (req, res) => {
   try {
     const jobs = await jobService.getAllJobs(req.query);
@@ -43,8 +40,6 @@ exports.getJobById = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
-
-// --- APPLICANT ACTIONS ---
 exports.applyToJob = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
@@ -82,9 +77,6 @@ exports.applyToJob = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
-// --- COMPANY ACTIONS ---
-
 exports.createJob = async (req, res) => {
   try {
     const { generateWithAI, ...jobData } = req.body;
@@ -133,9 +125,6 @@ exports.updateApplicantStatus = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
-
-// --- NEW AI SCORING ENDPOINTS ---
 
 exports.getTopCandidates = async (req, res) => {
   try {

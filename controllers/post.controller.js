@@ -2,7 +2,6 @@ const PostService = require('../services/post.service');
 const { generatePostContent } = require('../utils/groq');
 
 class PostController {
-  // Create a new post
   static async createPost(req, res) {
     try {
       let { content } = req.body;
@@ -19,16 +18,14 @@ class PostController {
         const mimeType = file.mimetype;
         const [mainType, subType] = mimeType.split('/');
         
-        // Determine the correct media type for your schema
         let mediaType;
         if (mainType === 'image') {
           mediaType = 'image';
         } else if (mainType === 'video') {
           mediaType = 'video';
         } else if (mimeType === 'application/pdf' || subType === 'pdf') {
-          mediaType = 'pdf';  // Special case for PDFs
+          mediaType = 'pdf';  
         } else {
-          // Default to image or handle unknown types
           mediaType = 'image';
         }
 
@@ -60,7 +57,6 @@ class PostController {
     }
   }
 
-  // Get single post
   static async getPost(req, res) {
     try {
       const { id } = req.params;
@@ -85,8 +81,6 @@ class PostController {
       });
     }
   }
-
-  // Update post
   static async updatePost(req, res) {
     try {
       const { id } = req.params;
@@ -128,8 +122,6 @@ class PostController {
       });
     }
   }
-
-  // Delete post
   static async deletePost(req, res) {
     try {
       const { id } = req.params;
@@ -154,8 +146,6 @@ class PostController {
       });
     }
   }
-
-  // Get user feed
   static async getFeed(req, res) {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -175,8 +165,6 @@ class PostController {
       });
     }
   }
-
-  // Get posts by user
   static async getUserPosts(req, res) {
     try {
       const { userId } = req.params;
@@ -197,8 +185,6 @@ class PostController {
       });
     }
   }
-
-  // Get posts by company
   static async getCompanyPosts(req, res) {
     try {
       const { companyId } = req.params;
@@ -219,8 +205,6 @@ class PostController {
       });
     }
   }
-
-  // Search posts
   static async searchPosts(req, res) {
     try {
       const { q } = req.query;

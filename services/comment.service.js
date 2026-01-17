@@ -6,7 +6,6 @@ const Company = require('../models/Company.model');
 const notificationService = require('./notification.service');
 
 class CommentService {
-  // Create a comment
   static async createComment(postId, authorId, authorType, content, parentCommentId = null) {
     const comment = new Comment({
       postId,
@@ -20,22 +19,16 @@ class CommentService {
 
     const savedComment = await comment.save();
 
-    // Increment comment count on post
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
-
-    // If it's a reply, increment replies count on parent comment
     if (parentCommentId) {
       await Comment.findByIdAndUpdate(parentCommentId, { $inc: { repliesCount: 1 } });
     }
 
-    // Notifications:
     try {
-      // Notify post author when someone comments (top-level comment)
       const post = await Post.findById(postId).select('author');
       if (post) {
         const postAuthorId = post.author.id;
         const postAuthorType = post.author.type;
-        // If commenter is not the post author, notify
         if (postAuthorId.toString() !== authorId.toString()) {
           await notificationService.createNotification(
             { id: postAuthorId, type: postAuthorType },
@@ -45,8 +38,6 @@ class CommentService {
           );
         }
       }
-
-      // If it's a reply, also notify the parent comment author (if different)
       if (parentCommentId) {
         const parent = await Comment.findById(parentCommentId).select('author');
         if (parent && parent.author.id.toString() !== authorId.toString()) {
@@ -65,21 +56,16 @@ class CommentService {
     return await this.getCommentWithAuthor(savedComment._id);
   }
 
-  // Get comment with author details
   static async getCommentWithAuthor(commentId, currentUserId = null) {
     const comment = await Comment.findById(commentId);
 
     if (!comment) return null;
-
-    // Populate author
     let authorData = null;
     if (comment.author.type === 'User') {
      authorData = await User.findById(comment.author.id).select('firstName lastName image');
     } else if (comment.author.type === 'Company') {
       authorData = await Company.findById(comment.author.id).select('name logo');
     }
-
-    // Add user's reaction if logged in
     let userReaction = null;
     if (currentUserId) {
       userReaction = await Reaction.findOne({
@@ -95,8 +81,6 @@ class CommentService {
 
     return commentObj;
   }
-
-  // Get comments for a post
   static async getCommentsByPost(postId, page = 1, limit = 20, currentUserId = null) {
     const skip = (page - 1) * limit;
 
@@ -107,11 +91,8 @@ class CommentService {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
-    // Add user reactions and author details to each comment
     const commentsWithReactions = await Promise.all(
       comments.map(async (comment) => {
-        // Populate author
         let authorData = null;
         if (comment.author.type === 'User') {
           authorData = await User.findById(comment.author.id).select('firstName lastName image');
@@ -150,8 +131,6 @@ class CommentService {
       }
     };
   }
-
-  // Update comment
   static async updateComment(commentId, authorId, authorType, content) {
     const comment = await Comment.findOne({
       _id: commentId,
@@ -164,8 +143,6 @@ class CommentService {
     comment.content = content;
     return await comment.save();
   }
-
-  // Delete comment
   static async deleteComment(commentId, authorId, authorType) {
     const comment = await Comment.findOne({
       _id: commentId,
@@ -174,37 +151,23 @@ class CommentService {
     });
 
     if (!comment) return null;
-    // find replies to this comment so we can adjust post.commentsCount correctly
     const replies = await Comment.find({ parentCommentId: commentId }).select('_id').lean();
     const numReplies = replies.length;
-
-    // delete the comment itself
     await Comment.findByIdAndDelete(commentId);
-
-    // delete all replies to this comment
     if (numReplies > 0) {
       const replyIds = replies.map(r => r._id);
       await Comment.deleteMany({ parentCommentId: commentId });
-      // delete reactions associated with replies as well
       await Reaction.deleteMany({ 'target.id': { $in: replyIds }, 'target.type': 'Comment' });
     }
-
-    // Decrement comment count on post by 1 + number of replies removed
     const decrement = 1 + numReplies;
     await Post.findByIdAndUpdate(comment.postId, { $inc: { commentsCount: -decrement } });
-
-    // If it's a reply, decrement reply count on parent comment
     if (comment.parentCommentId) {
       await Comment.findByIdAndUpdate(comment.parentCommentId, { $inc: { repliesCount: -1 } });
     }
-
-    // Delete all reactions to this comment
     await Reaction.deleteMany({ 'target.id': commentId, 'target.type': 'Comment' });
 
     return comment;
   }
-
-  // Get replies for a comment
   static async getReplies(commentId, page = 1, limit = 20, currentUserId = null) {
     const skip = (page - 1) * limit;
 
@@ -214,11 +177,8 @@ class CommentService {
       .sort({ createdAt: 1 })
       .skip(skip)
       .limit(limit);
-
-    // Add user reactions and author details to each reply
     const repliesWithReactions = await Promise.all(
       replies.map(async (reply) => {
-        // Populate author
         let authorData = null;
         if (reply.author.type === 'User') {
           authorData = await User.findById(reply.author.id).select('firstName lastName image');

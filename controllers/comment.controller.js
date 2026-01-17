@@ -2,7 +2,6 @@ const CommentService = require('../services/comment.service');
 const { generatePostContent } = require('../utils/groq');
 
 class CommentController {
-  // Create a comment
   static async createComment(req, res) {
   try {
     const { postId } = req.params;
@@ -24,7 +23,7 @@ class CommentController {
 
     res.status(201).json({
       success: true,
-      message: 'Comment added successfully',
+      message: 'Comment added',
       data: comment
     });
   } catch (error) {
@@ -35,9 +34,6 @@ class CommentController {
     });
   }
 }
-
-
-  // Get comments for a post
   static async getPostComments(req, res) {
     try {
       const { postId } = req.params;
@@ -63,8 +59,6 @@ class CommentController {
       });
     }
   }
-
-  // Update comment
  static async updateComment(req, res) {
   try {
     const { commentId } = req.params;
@@ -75,7 +69,6 @@ class CommentController {
     if (content !== undefined && useAI) {
       content = await generatePostContent(content);
     }
-
     const comment = await CommentService.updateComment(
       commentId,
       req.user.id,
@@ -86,10 +79,9 @@ class CommentController {
     if (!comment) {
       return res.status(404).json({
         success: false,
-        message: 'Comment not found or not authorized'
+        message: 'Comment not found or authorized'
       });
     }
-
     res.json({
       success: true,
       message: 'Comment updated successfully',
@@ -103,9 +95,6 @@ class CommentController {
     });
   }
 }
-
-
-  // Delete comment
   static async deleteComment(req, res) {
     try {
       const { commentId } = req.params;
@@ -119,7 +108,7 @@ class CommentController {
       if (!comment) {
         return res.status(404).json({
           success: false,
-          message: 'Comment not found or not authorized'
+          message: 'Comment not found or  authorized'
         });
       }
 
@@ -135,8 +124,6 @@ class CommentController {
       });
     }
   }
-
-  // Get comment replies
   static async getReplies(req, res) {
     try {
       const { commentId } = req.params;

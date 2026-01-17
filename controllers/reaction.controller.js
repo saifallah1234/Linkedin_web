@@ -1,7 +1,6 @@
 const ReactionService = require('../services/reaction.service');
 
 class ReactionController {
-  // React to a post or comment
   static async addReaction(req, res) {
     try {
       const { targetType, targetId } = req.params;
@@ -48,8 +47,6 @@ class ReactionController {
       });
     }
   }
-
-  // Remove reaction
   static async removeReaction(req, res) {
     try {
       const { targetType, targetId } = req.params;
@@ -79,8 +76,6 @@ class ReactionController {
       });
     }
   }
-
-  // Get reactions for a target
   static async getReactions(req, res) {
     try {
       const { targetType, targetId } = req.params;
@@ -106,8 +101,6 @@ class ReactionController {
       });
     }
   }
-
-  // Get user's reaction on a target
   static async getUserReaction(req, res) {
     try {
       const { targetType, targetId } = req.params;
@@ -130,13 +123,9 @@ class ReactionController {
       });
     }
   }
-
-  // Get reaction statistics
   static async getReactionStats(req, res) {
     try {
         const { targetType, targetId } = req.params;
-
-        // Validate targetId is a valid MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(targetId)) {
             return res.status(400).json({
                 success: false,

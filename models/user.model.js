@@ -43,7 +43,6 @@ const followingCompanySchema = new mongoose.Schema({
   followedAt: { type: Date, default: Date.now }
 });
 
-// --- 2. Main User Schema ---
 
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
@@ -58,25 +57,22 @@ const userSchema = new mongoose.Schema({
   password: { 
     type: String, 
     required: function() {
-      // Only required for non-Google users
       return !this.googleId;
     }, 
     select: false 
   },
   dateOfBirth: { type: Date },
-  image: { type: String, default: '' }, // URL to avatar
+  image: { type: String, default: '' }, 
   location: { type: String, required: true, trim: true },
-  // --- NEW FIELDS FOR GOOGLE ---
   googleId: {
     type: String,
     unique: true,
-    sparse: true // Allows multiple null values
+    sparse: true 
   },
   isGoogleUser: {
     type: Boolean,
     default: false
   },
-  // --- Embedded Arrays ---
   followingCompanies: [followingCompanySchema],
   education: [educationSchema],
   projects: [projectSchema],
@@ -85,10 +81,7 @@ const userSchema = new mongoose.Schema({
   certificates: [certificateSchema],
   createdAt: { type: Date, default: Date.now }
 });
-
-// --- MODIFIED PASSWORD HASHING MIDDLEWARE ---
 userSchema.pre('save', async function() {
-  // Only hash password if it's being modified AND user is NOT a Google user
   if (this.isModified('password') && this.password && !this.googleId) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

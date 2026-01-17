@@ -27,7 +27,7 @@ const upload = require('../middleware/upload');
  *       401:
  *         description: Unauthorized
  */
-router.get('/profile', authenticate, isCompany, companyController.getCompanyProfile);
+router.get('/profile', authenticate, companyController.getCompanyProfile);
 
 /**
  * @swagger

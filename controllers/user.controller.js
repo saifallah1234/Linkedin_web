@@ -3,13 +3,11 @@ const mongoose = require('mongoose');
 const JobOffer = require('../models/JobOffer.model');
 const Company = require('../models/Company.model');
 const Connection = require('../models/Connection.model');
-const fs = require('fs'); // Needed to delete old images if replaced
+const fs = require('fs');
 
 exports.getAllUsers = async (req, res) => {
   try {
     const currentUserId = req.user.id;
-
-    // Find all users where _id is NOT EQUAL ($ne) to currentUserId
     const users = await User.find({ _id: { $ne: currentUserId } })
       .select('-password')
       .sort({ createdAt: -1 });
@@ -25,20 +23,12 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
   try {
     const userId= req.user.id;
-
-    // 2. Find User
-    // .select('-password') ensures password is never sent, even if select:false was missing
-    // .populate(...) replaces the companyId with actual Company data (Name, Logo)
     const user = await User.findById(userId)
       .select('-password')
       .populate('followingCompanies.companyId', 'name logo location');
-
-    // 3. Handle Not Found
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    // 4. Send Data
     res.json(user);
 
   } catch (error) {
@@ -49,28 +39,17 @@ exports.getUserProfile = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    // --- 1. FIX: Extract ID correctly ---
     let userId = req.user.id || req.user._id;
-
-    // Fix the "Buffer" error: Force it to a string
     if (userId && typeof userId === 'object' && userId.toString) {
       userId = userId.toString();
     }
-
-    // --- 2. Prepare Update Data ---
     const updates = { ...req.body };
-
-    // Prevent updating sensitive fields
     delete updates.role;
     delete updates._id;
     delete updates.createdAt;
-    delete updates.password; // Important security addition
-
-    // --- 3. Handle Image Upload ---
+    delete updates.password; 
     if (req.file) {
       updates.image = req.file.path;
-      
-      // Delete old image
       try {
         const oldUser = await User.findById(userId);
         if (oldUser && oldUser.image && fs.existsSync(oldUser.image)) {
@@ -80,8 +59,6 @@ exports.updateUser = async (req, res) => {
         console.error("Error cleaning up old image:", err);
       }
     }
-
-    // --- 4. Parse Arrays ---
     ['education', 'projects', 'experiences', 'skills', 'certificates'].forEach(field => {
       if (updates[field] && typeof updates[field] === 'string') {
         try {
@@ -91,11 +68,9 @@ exports.updateUser = async (req, res) => {
         }
       }
     });
-
-    // --- 5. Perform Update ---
     const updatedUser = await User.findByIdAndUpdate(
-      userId, // Use the sanitized userId string
-      { $set: updates }, // Use $set for safer updates
+      userId, 
+      { $set: updates },
       { new: true, runValidators: true }
     ).select('-password');
 
@@ -116,16 +91,12 @@ exports.updateUser = async (req, res) => {
 
 exports.followCompany = async (req, res) => {
   try {
-    const userId = req.user.id;        // From Token (or Mock Middleware)
-    const companyId = req.params.id;   // From URL
-
-    // 1. Check if Company exists
+    const userId = req.user.id;        
+    const companyId = req.params.id;  
     const company = await Company.findById(companyId);
     if (!company) {
       return res.status(404).json({ message: 'Company not found' });
     }
-
-    // 2. Check if User is already following this company
     const userAlreadyFollowing = await User.findOne({
       _id: userId,
       'followingCompanies.companyId': companyId
@@ -134,8 +105,6 @@ exports.followCompany = async (req, res) => {
     if (userAlreadyFollowing) {
       return res.status(400).json({ message: 'You are already following this company' });
     }
-
-    // 3. Add to User's "followingCompanies" array
     await User.findByIdAndUpdate(userId, {
       $push: {
         followingCompanies: {
@@ -158,10 +127,8 @@ exports.followCompany = async (req, res) => {
 
 exports.unfollowCompany = async (req, res) => {
   try {
-    const userId = req.user.id;      // From Token
-    const companyId = req.params.id; // From URL
-
-    // --- Perform Unfollow ---
+    const userId = req.user.id;     
+    const companyId = req.params.id; 
     const user = await User.findByIdAndUpdate(userId, {
       $pull: { 
         followingCompanies: { companyId: companyId } 
@@ -205,8 +172,6 @@ exports.getFollowingList = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-// Public profile for viewing other users (non-authenticated)
 exports.getPublicProfile = async (req, res) => {
   try {
     const { id } = req.params;
@@ -224,20 +189,14 @@ exports.getPublicProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-// Get suggestions for users to follow (companies) and users to connect with
 exports.getSuggestions = async (req, res) => {
   try {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit, 10) || 5;
-
-    // Get current user with their following companies
     const user = await User.findById(userId).select('followingCompanies');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const followedCompanyIds = (user.followingCompanies || []).map(f => f.companyId.toString());
-
-    // Get connected user ids (ACCEPTED connections)
     const connections = await Connection.find({
       $or: [ { requesterId: userId }, { receiverId: userId } ],
       status: 'ACCEPTED'
@@ -248,24 +207,18 @@ exports.getSuggestions = async (req, res) => {
       acc.push(other);
       return acc;
     }, []);
-
-    // Suggested companies (exclude followed)
     const companyMatch = followedCompanyIds.length ? { _id: { $nin: followedCompanyIds.map(id => mongoose.Types.ObjectId(id)) } } : {};
     const suggestedCompanies = await Company.aggregate([
       { $match: companyMatch },
       { $sample: { size: Math.min(limit, 20) } },
       { $project: { name: 1, logo: 1, location: 1, description: 1 } }
     ]);
-
-    // Suggested users (exclude self and already connected users)
     const excludeUserIds = [ mongoose.Types.ObjectId(userId), ...((connectedUserIds || []).map(id => mongoose.Types.ObjectId(id))) ];
     const suggestedUsers = await User.aggregate([
       { $match: { _id: { $nin: excludeUserIds } } },
       { $sample: { size: Math.min(limit, 20) } },
       { $project: { firstName: 1, lastName: 1, image: 1, location: 1 } }
     ]);
-
-    // Limit results to requested limit
     res.json({
       suggestedCompanies: suggestedCompanies.slice(0, limit),
       suggestedUsers: suggestedUsers.slice(0, limit)
@@ -276,10 +229,6 @@ exports.getSuggestions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// --- CRUD for Experiences, Projects, Skills, Certificates ---
-
-// Experiences
 exports.addExperience = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -320,8 +269,6 @@ exports.deleteExperience = async (req, res) => {
   try {
     const userId = req.user.id;
     const expId = req.params.id;
-    
-    // Use $pull operator to remove the experience
     const user = await User.findByIdAndUpdate(
       userId,
       { $pull: { experiences: { _id: expId } } },
@@ -341,8 +288,6 @@ exports.getUserSuggestions = async (req, res) => {
   try {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit, 10) || 5;
-
-    // Get connected user ids
     const connections = await Connection.find({
       $or: [{ requesterId: userId }, { receiverId: userId }],
       status: 'ACCEPTED'
@@ -353,11 +298,7 @@ exports.getUserSuggestions = async (req, res) => {
       acc.push(other);
       return acc;
     }, []);
-
-    // Add self to exclude list
     const excludeIds = [...connectedUserIds, userId];
-
-    // Get random users not connected yet
     const suggestedUsers = await User.aggregate([
       {
         $match: {
@@ -383,18 +324,12 @@ exports.getUserSuggestions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Get company suggestions (companies to follow)
 exports.getCompanySuggestions = async (req, res) => {
   try {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit, 10) || 5;
-
-    // Get user's followed companies
     const user = await User.findById(userId).select('followingCompanies');
     const followedCompanyIds = (user.followingCompanies || []).map(f => f.companyId.toString());
-
-    // Get random companies not followed yet
     const suggestedCompanies = await Company.aggregate([
       {
         $match: {
@@ -420,23 +355,17 @@ exports.getCompanySuggestions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Get active jobs (not applied to yet)
 exports.getActiveJobs = async (req, res) => {
   try {
     const userId = req.user.id;
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-
-    // Get all jobs user has applied to
     const appliedJobs = await JobOffer.find({
       'applicants.userId': userId
     }).select('_id').lean();
 
     const appliedJobIds = appliedJobs.map(job => job._id);
-
-    // Get active jobs not applied to
     const now = new Date();
     const jobs = await JobOffer.find({
       _id: { $nin: appliedJobIds },
@@ -469,8 +398,6 @@ exports.getActiveJobs = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Get jobs expiring soon (within 7 days)
 exports.getExpiringJobs = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -478,8 +405,6 @@ exports.getExpiringJobs = async (req, res) => {
 
     const now = new Date();
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    // Get jobs expiring within 7 days
     const expiringJobs = await JobOffer.find({
       isActive: true,
       deadline: {
@@ -498,16 +423,11 @@ exports.getExpiringJobs = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Get companies currently hiring
 exports.getHiringCompanies = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 10;
-
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-    // Find companies with active job postings created in last 30 days
     const activeJobs = await JobOffer.aggregate([
       {
         $match: {
@@ -531,8 +451,6 @@ exports.getHiringCompanies = async (req, res) => {
     const companies = await Company.find({ _id: { $in: companyIds } })
       .select('name logo location description website')
       .lean();
-
-    // Merge job count with company data
     const companiesWithJobCount = companies.map(company => {
       const jobData = activeJobs.find(job => job._id.toString() === company._id.toString());
       return {
@@ -547,8 +465,6 @@ exports.getHiringCompanies = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Projects
 exports.addProject = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -597,8 +513,6 @@ exports.deleteProject = async (req, res) => {
   try {
     const userId = req.user.id;
     const projId = req.params.id;
-    
-    // Use $pull operator to remove the project
     const user = await User.findByIdAndUpdate(
       userId,
       { $pull: { projects: { _id: projId } } },
@@ -613,8 +527,6 @@ exports.deleteProject = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Skills
 exports.addSkill = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -656,8 +568,6 @@ exports.deleteSkill = async (req, res) => {
   try {
     const userId = req.user.id;
     const skillId = req.params.id;
-    
-    // Use $pull operator to remove the skill
     const user = await User.findByIdAndUpdate(
       userId,
       { $pull: { skills: { _id: skillId } } },
@@ -672,8 +582,6 @@ exports.deleteSkill = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Certificates
 exports.addCertificate = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -726,8 +634,6 @@ exports.deleteCertificate = async (req, res) => {
   try {
     const userId = req.user.id;
     const certId = req.params.id;
-    
-    // Use $pull operator to remove the certificate
     const user = await User.findByIdAndUpdate(
       userId,
       { $pull: { certificates: { _id: certId } } },
@@ -742,13 +648,9 @@ exports.deleteCertificate = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Generate PDF Resume from user profile
 exports.generateResumePDF = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    // Get full user profile with all details
     const user = await User.findById(userId)
       .select('-password -email')
       .lean();
@@ -756,19 +658,11 @@ exports.generateResumePDF = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    // Use PDFKit to generate PDF
     const PDFDocument = require('pdfkit');
     const doc = new PDFDocument({ margin: 40 });
-
-    // Set response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${user.firstName}_${user.lastName}_Resume.pdf"`);
-    
-    // Pipe PDF to response
     doc.pipe(res);
-
-    // HEADER - Name and Title
     doc.fontSize(24).font('Helvetica-Bold').text(`${user.firstName} ${user.lastName}`, { align: 'center' });
     
     if (user.headline) {
@@ -779,15 +673,11 @@ exports.generateResumePDF = async (req, res) => {
     doc.moveDown(0.5);
     doc.strokeColor('#CCCCCC').lineWidth(1).moveTo(40, doc.y).lineTo(555, doc.y).stroke();
     doc.moveDown(0.5);
-
-    // ABOUT/SUMMARY
     if (user.about) {
       doc.font('Helvetica-Bold').fontSize(12).text('PROFESSIONAL SUMMARY');
       doc.font('Helvetica').fontSize(10).text(user.about);
       doc.moveDown(0.5);
     }
-
-    // EXPERIENCE
     if (user.experiences && user.experiences.length > 0) {
       doc.font('Helvetica-Bold').fontSize(12).text('EXPERIENCE');
       
@@ -811,8 +701,6 @@ exports.generateResumePDF = async (req, res) => {
       
       doc.moveDown(0.5);
     }
-
-    // EDUCATION
     if (user.education && user.education.length > 0) {
       doc.font('Helvetica-Bold').fontSize(12).text('EDUCATION');
       
@@ -837,7 +725,6 @@ exports.generateResumePDF = async (req, res) => {
       doc.moveDown(0.5);
     }
 
-    // SKILLS
     if (user.skills && user.skills.length > 0) {
       doc.font('Helvetica-Bold').fontSize(12).text('SKILLS');
       const skillNames = user.skills.map(s => s.name).join(' • ');
@@ -845,7 +732,6 @@ exports.generateResumePDF = async (req, res) => {
       doc.moveDown(0.5);
     }
 
-    // CERTIFICATIONS
     if (user.certificates && user.certificates.length > 0) {
       doc.font('Helvetica-Bold').fontSize(12).text('CERTIFICATIONS');
       
@@ -861,7 +747,6 @@ exports.generateResumePDF = async (req, res) => {
       doc.moveDown(0.5);
     }
 
-    // PROJECTS
     if (user.projects && user.projects.length > 0) {
       doc.font('Helvetica-Bold').fontSize(12).text('PROJECTS');
       
@@ -883,12 +768,8 @@ exports.generateResumePDF = async (req, res) => {
         }
       });
     }
-
-    // Footer with generation date
     doc.moveDown(1);
     doc.fontSize(8).fillColor('#CCCCCC').text(`Generated on ${new Date().toLocaleDateString()}`, { align: 'center' });
-
-    // Finalize PDF
     doc.end();
 
   } catch (error) {

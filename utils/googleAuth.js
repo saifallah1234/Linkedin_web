@@ -1,14 +1,8 @@
 const { OAuth2Client } = require('google-auth-library');
-
-// Create Google OAuth client
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-/**
- * Verify Google ID token and extract user info
- */
 const verifyGoogleToken = async (idToken) => {
   try {
-    console.log('🔐 Verifying Google token...');
+    console.log('Verifying Google token...');
     
     const ticket = await googleClient.verifyIdToken({
       idToken: idToken,
@@ -17,7 +11,7 @@ const verifyGoogleToken = async (idToken) => {
     
     const payload = ticket.getPayload();
     
-    console.log('✅ Google token verified for:', payload.email);
+    console.log('Google token verified for:', payload.email);
     
     return {
       googleId: payload.sub,
@@ -30,7 +24,7 @@ const verifyGoogleToken = async (idToken) => {
     };
     
   } catch (error) {
-    console.error('❌ Google token verification failed:', error.message);
+    console.error('Google token verification failed:', error.message);
     throw new Error('Invalid Google token');
   }
 };

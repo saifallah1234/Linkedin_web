@@ -1,8 +1,4 @@
 const trendsService = require('../services/trends.service');
-
-/**
- * Get trending topics/hashtags
- */
 exports.getTrendingTopics = async (req, res) => {
   try {
     const { limit = 5 } = req.query;
@@ -23,10 +19,6 @@ exports.getTrendingTopics = async (req, res) => {
     });
   }
 };
-
-/**
- * Get all trending data for feed (single endpoint)
- */
 exports.getFeedTrends = async (req, res) => {
   try {
     const result = await trendsService.getFeedTrends();

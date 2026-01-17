@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // Make sure to import bcryptjs
+const bcrypt = require('bcryptjs'); 
 
 const companySchema = new mongoose.Schema({
   name: { 
@@ -38,15 +38,8 @@ const companySchema = new mongoose.Schema({
   }],
   createdAt: { type: Date, default: Date.now }
 });
-
-
-// Encrypt password before saving
 companySchema.pre('save', async function() {
-  // 1. If password is not modified, return immediately
   if (!this.isModified('password')) return;
-
-  // 2. Hash the password
-  // (No try/catch needed here; if it fails, Mongoose catches the promise rejection automatically)
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });

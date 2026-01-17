@@ -2,10 +2,9 @@ const User = require('../models/User.model');
 const Company = require('../models/Company.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { verifyGoogleToken } = require('../utils/googleAuth'); // ADD THIS IMPORT
+const { verifyGoogleToken } = require('../utils/googleAuth');
 
 const generateToken = (id, role) => {
-  // Ensure role is properly capitalized for your middleware
   const formattedRole = role.toUpperCase() === 'USER' ? 'User' : 
                        role.toUpperCase() === 'COMPANY' ? 'Company' : role;
   
@@ -13,22 +12,14 @@ const generateToken = (id, role) => {
 };
 
 
-// --- 1. User Signup ---
 exports.signupUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password, location, dateOfBirth } = req.body;
-    // Ensure model-required fields have fallbacks when frontend omits them
     const safeLocation = location || 'Unknown';
-    
-    // Check if file was uploaded
     const imagePath = req.file ? req.file.path : ''; 
-
-    // Check duplicates
     if (await User.findOne({ email }) || await Company.findOne({ email })) {
-      return res.status(400).json({ message: 'Email already in use' });
+      return res.status(400).json({ message: 'Email in use' });
     }
-
-    // Let the User model handle password hashing in its pre-save middleware
     const user = await User.create({
       firstName,
       lastName,
@@ -37,7 +28,7 @@ exports.signupUser = async (req, res) => {
       location: safeLocation,
       dateOfBirth,
       image: imagePath,
-      isGoogleUser: false // Explicitly mark as non-Google user
+      isGoogleUser: false
     });
 
     const token = generateToken(user._id, 'USER');
@@ -59,19 +50,15 @@ exports.signupUser = async (req, res) => {
   }
 };
 
-// --- NEW: Google Signup for Users ---
 exports.signupUserWithGoogle = async (req, res) => {
   try {
     const { googleToken, location, dateOfBirth } = req.body;
     
     if (!googleToken) {
-      return res.status(400).json({ message: 'Google token is required' });
+      return res.status(400).json({ message: 'Google token required' });
     }
-
-    // Verify Google token and get user info
     const googleUser = await verifyGoogleToken(googleToken);
     
-    // Check if email already exists
     const existingUser = await User.findOne({ email: googleUser.email });
     const existingCompany = await Company.findOne({ email: googleUser.email });
     
@@ -81,7 +68,6 @@ exports.signupUserWithGoogle = async (req, res) => {
       });
     }
 
-    // Create user with Google data
     const user = await User.create({
       googleId: googleUser.googleId,
       email: googleUser.email,
@@ -91,7 +77,6 @@ exports.signupUserWithGoogle = async (req, res) => {
       dateOfBirth: dateOfBirth || null,
       image: googleUser.picture || '',
       isGoogleUser: true,
-      // No password for Google users
       password: undefined
     });
 
@@ -124,19 +109,15 @@ exports.signupUserWithGoogle = async (req, res) => {
   }
 };
 
-// --- 2. Company Signup ---
 exports.signupCompany = async (req, res, next) => {
   try {
     const { name, email, password, location, website, description } = req.body;
     
-    // Check if file was uploaded
     const logoPath = req.file ? req.file.path : '';
 
     if (await User.findOne({ email }) || await Company.findOne({ email })) {
-      return res.status(400).json({ message: 'Email already in use' });
+      return res.status(400).json({ message: 'Email in use' });
     }
-
-    // Let the Company model handle password hashing in its pre-save middleware
     const company = await Company.create({
       name,
       email,
@@ -165,19 +146,14 @@ exports.signupCompany = async (req, res, next) => {
   }
 };
 
-// --- 3. User Login (UPDATED FOR GOOGLE USERS) ---
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Only search in USER collection
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res.status(401).json({ message: 'User account not found' });
     }
-
-    // Check if this is a Google user trying to use password login
     if (user.googleId || user.isGoogleUser) {
       return res.status(400).json({ 
         message: 'This account uses Google authentication. Please sign in with Google.' 
@@ -188,11 +164,7 @@ exports.loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-
-    // Generate User Token
     const token = generateToken(user._id, 'User');
-
-    // Clean response
     const userData = user.toObject();
     delete userData.password;
 
@@ -215,12 +187,9 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// --- 4. Company Login ---
 exports.loginCompany = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Only search in COMPANY collection
     const company = await Company.findOne({ email }).select('+password');
 
     if (!company) {
@@ -231,11 +200,7 @@ exports.loginCompany = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-
-    // Generate Company Token
     const token = generateToken(company._id, 'Company');
-
-    // Clean response
     const companyData = company.toObject();
     delete companyData.password;
 
@@ -256,8 +221,6 @@ exports.loginCompany = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// --- NEW: Check Google Signup Availability ---
 exports.checkGoogleSignupAvailability = async (req, res) => {
   try {
     const { email } = req.body;
@@ -295,12 +258,8 @@ exports.unifiedLogin = async (req, res) => {
         message: 'Email and password are required' 
       });
     }
-
-    // 1. Fetch BOTH potential accounts at once
     const user = await User.findOne({ email }).select('+password');
     const company = await Company.findOne({ email }).select('+password');
-
-    // 2. If neither exists, stop here
     if (!user && !company) {
       return res.status(401).json({ 
         success: false, 
@@ -311,10 +270,7 @@ exports.unifiedLogin = async (req, res) => {
     let account = null;
     let role = '';
     let type = '';
-
-    // 3. Attempt to match USER password first
     if (user) {
-      // Only check password if it's not a Google-only account
       if (!user.googleId && !user.isGoogleUser) {
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
@@ -324,8 +280,6 @@ exports.unifiedLogin = async (req, res) => {
         }
       }
     }
-
-    // 4. If User didn't match (account is still null), try COMPANY
     if (!account && company) {
       const isMatch = await bcrypt.compare(password, company.password);
       if (isMatch) {
@@ -334,19 +288,13 @@ exports.unifiedLogin = async (req, res) => {
         type = 'company';
       }
     }
-
-    // 5. If neither matched after checking both
     if (!account) {
       return res.status(401).json({ 
         success: false, 
         message: 'Invalid credentials' 
       });
     }
-
-    // 6. Success! Generate Token
     const token = generateToken(account._id, role);
-
-    // 7. Prepare Response
     let response = {
       success: true,
       message: `${type.charAt(0).toUpperCase() + type.slice(1)} login successful`,
@@ -375,8 +323,6 @@ exports.unifiedLogin = async (req, res) => {
     });
   }
 };
-
-// --- NEW: Unified Google Login - UPDATED FOR YOUR MIDDLEWARE ---
 exports.unifiedGoogleLogin = async (req, res) => {
   try {
     const { googleToken } = req.body;
@@ -387,11 +333,7 @@ exports.unifiedGoogleLogin = async (req, res) => {
         message: 'Google token is required' 
       });
     }
-
-    // Verify Google token
     const googleUser = await verifyGoogleToken(googleToken);
-    
-    // Search in both collections
     const existingUser = await User.findOne({ email: googleUser.email });
     const existingCompany = await Company.findOne({ email: googleUser.email });
 
@@ -400,7 +342,6 @@ exports.unifiedGoogleLogin = async (req, res) => {
     let type = '';
 
     if (existingUser) {
-      // Check if this user was originally created with Google
       if (!existingUser.googleId && !existingUser.isGoogleUser) {
         return res.status(400).json({ 
           success: false,
@@ -409,10 +350,9 @@ exports.unifiedGoogleLogin = async (req, res) => {
       }
       
       account = existingUser;
-      role = 'User'; // Capitalized for your middleware
+      role = 'User'; 
       type = 'user';
       
-      // Update Google info if needed
       if (!account.googleId) {
         account.googleId = googleUser.googleId;
         account.isGoogleUser = true;
@@ -420,13 +360,11 @@ exports.unifiedGoogleLogin = async (req, res) => {
       }
       
     } else if (existingCompany) {
-      // Companies typically don't use Google login
       return res.status(400).json({ 
         success: false,
         message: 'This email is registered as a company account. Please use password login.' 
       });
     } else {
-      // No account exists - could create one automatically or return error
       return res.status(404).json({ 
         success: false,
         message: 'No account found with this email. Please sign up first.',
@@ -434,11 +372,7 @@ exports.unifiedGoogleLogin = async (req, res) => {
         canSignup: true
       });
     }
-
-    // Generate token - use corrected role format
     const token = generateToken(account._id, role);
-
-    // Prepare response
     let response = {
       success: true,
       message: `${type.charAt(0).toUpperCase() + type.slice(1)} Google login successful`,
@@ -481,10 +415,8 @@ exports.unifiedGoogleLogin = async (req, res) => {
   }
 };
 
-// --- Get Current Session Info (Compatible with your middleware) ---
 exports.getCurrentSession = async (req, res) => {
   try {
-    // Use your authenticate middleware first, then this controller
     if (!req.user) {
       return res.json({ 
         success: true,
@@ -492,7 +424,6 @@ exports.getCurrentSession = async (req, res) => {
       });
     }
 
-    // If we get here, authenticate middleware has already verified the token
     const { type, account } = req.user;
     
     let response = {

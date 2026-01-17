@@ -2,7 +2,7 @@ const express = require("express");
 const morgan = require("morgan");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
-const path = require("path"); // ADD THIS LINE
+const path = require("path"); 
 const cors = require("cors");
 
 const auth = require('./routes/auth.route');
@@ -15,20 +15,15 @@ const trendsRoutes = require('./routes/trends.routes');
 const app = express();
 
 app.use(cors({
-  origin: "*", // or "*"
+  origin: "*", 
   credentials: true
 }));
 
-// Global Middleware
 app.use(express.json());
 app.use(morgan("dev"));
-
-// 🔹 Swagger route
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-// Test Route
 app.get("/", (req, res) => {
-  res.send("✅ LinkedIn Clone API is running...");
+  res.send("LinkedIn Clone API is running...");
 });
 
 app.get("/google-setup", (req, res) => {
@@ -39,9 +34,9 @@ app.get("/google-setup", (req, res) => {
     message: "Google Signup Setup Status",
     setup: {
       configured: hasGoogleConfig,
-      clientId: process.env.GOOGLE_CLIENT_ID ? "✅ Configured" : "❌ Missing",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ? "✅ Configured" : "❌ Missing",
-      jwtSecret: process.env.JWT_SECRET ? "✅ Configured" : "❌ Missing",
+      clientId: process.env.GOOGLE_CLIENT_ID ? "Configured" : "Missing",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ? "Configured" : "Missing",
+      jwtSecret: process.env.JWT_SECRET ? "Configured" : "Missing",
     },
     endpoints: {
       googleSignup: "POST /signup/user/google",
@@ -56,15 +51,7 @@ app.get("/google-setup", (req, res) => {
     }
   });
 });
-
-// 🔥 FIX: Static file serving for uploads
-// Use either one of these, not both:
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// OR if uploads is in the same directory as app.js
-// app.use('/uploads', express.static('uploads'));
-
-// Routes
 app.use('/', auth);
 app.use('/api/users', usersRoute);
 app.use('/connection', connection);
@@ -75,8 +62,6 @@ app.use('/api/trends', trendsRoutes);
 app.use('/api/jobs', require('./routes/job.routes'));
 app.use('/api/messages', require('./routes/message.route'));
 app.use('/api/notifications', require('./routes/notification.route'));
-
-// Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({

@@ -12,8 +12,6 @@ const postSchema = new mongoose.Schema({
   },
   content: { type: String, trim: true },
   media: [mediaSchema],
-
-  // --- CACHED COUNTERS (The "Sum" you asked for) ---
   likesCount: { 
     type: Number, 
     default: 0 

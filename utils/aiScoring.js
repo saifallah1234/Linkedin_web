@@ -5,8 +5,6 @@ const Company = require('../models/Company.model');
 const groqClient = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
-
-// Generate AI score for job applicant
 async function generateApplicantScore(userProfile, jobDetails, maxTokens = 500) {
   if (!userProfile || !jobDetails) {
     return { score: 0, feedback: "Insufficient data for evaluation" };
@@ -55,7 +53,7 @@ INSTRUCTIONS:
     const completion = await groqClient.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.3, // Lower temperature for more consistent scoring
+      temperature: 0.3, 
       max_tokens: maxTokens,
       top_p: 0.9,
       response_format: { type: "json_object" }
@@ -63,7 +61,6 @@ INSTRUCTIONS:
 
     const result = JSON.parse(completion.choices[0].message.content.trim());
     
-    // Validate and normalize the score
     if (result.score > 100) result.score = 100;
     if (result.score < 0) result.score = 0;
     if (result.matchPercentage > 100) result.matchPercentage = 100;
@@ -72,9 +69,8 @@ INSTRUCTIONS:
     return result;
     
   } catch (err) {
-    console.error("❌ Groq API error in generateApplicantScore:", err);
+    console.error("Groq API error in generateApplicantScore:", err);
     
-    // Fallback: Simple keyword matching
     const fallbackScore = calculateFallbackScore(userProfile, jobDetails);
     return {
       score: fallbackScore,
@@ -86,8 +82,6 @@ INSTRUCTIONS:
     };
   }
 }
-
-// Format user profile for AI analysis
 function formatUserProfileForAI(user) {
   if (!user) return "No profile data available";
   
@@ -131,14 +125,10 @@ ${user.certificates && user.certificates.length > 0
   : 'No certifications listed'}
   `;
 }
-
-// Fallback scoring based on keyword matching
 function calculateFallbackScore(user, job) {
-  let score = 50; // Base score
+  let score = 50; 
   
   if (!user || !job) return score;
-  
-  // Check skills match
   if (user.skills && job.skillsRequired) {
     const userSkills = user.skills.map(s => s.name.toLowerCase());
     const requiredSkills = job.skillsRequired.map(s => s.toLowerCase());
@@ -152,8 +142,6 @@ function calculateFallbackScore(user, job) {
       score += skillMatchPercentage;
     }
   }
-  
-  // Check experience
   if (user.experiences && user.experiences.length > 0) {
     const totalExperienceMonths = user.experiences.reduce((total, exp) => {
       const start = new Date(exp.startDate);
@@ -162,12 +150,10 @@ function calculateFallbackScore(user, job) {
       return total + Math.max(0, months);
     }, 0);
     
-    if (totalExperienceMonths > 60) score += 20; // 5+ years
-    else if (totalExperienceMonths > 36) score += 15; // 3-5 years
-    else if (totalExperienceMonths > 12) score += 10; // 1-3 years
+    if (totalExperienceMonths > 60) score += 20; 
+    else if (totalExperienceMonths > 36) score += 15; 
+    else if (totalExperienceMonths > 12) score += 10; 
   }
-  
-  // Check education
   if (user.education && user.education.length > 0) {
     const hasHigherEducation = user.education.some(edu => 
       ['master', 'phd', 'doctorate'].some(term => 
@@ -176,12 +162,8 @@ function calculateFallbackScore(user, job) {
     );
     if (hasHigherEducation) score += 10;
   }
-  
-  // Cap score at 100
   return Math.min(Math.round(score), 100);
 }
-
-// Batch score update for all applicants of a job
 async function updateAllApplicantScores(jobId) {
   try {
     const JobOffer = require('../models/JobOffer.model');
@@ -215,8 +197,6 @@ async function updateAllApplicantScores(jobId) {
         };
         
         const aiEvaluation = await generateApplicantScore(user, jobDetails);
-        
-        // Update applicant score
         applicant.score = aiEvaluation.score;
         applicant.matchPercentage = aiEvaluation.matchPercentage || aiEvaluation.score;
         applicant.aiFeedback = aiEvaluation.feedback || '';

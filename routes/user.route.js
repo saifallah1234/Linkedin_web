@@ -163,7 +163,6 @@ router.put(
  */
 router.post('/follow/:id', authenticate, isUser, userController.followCompany);
 
-// Unfollow a company
 /**
  * @swagger
  * /api/users/unfollow/{id}:
@@ -187,7 +186,6 @@ router.post('/follow/:id', authenticate, isUser, userController.followCompany);
  */
 router.post('/unfollow/:id', authenticate, isUser, userController.unfollowCompany);
 
-// Get user suggestions (users to connect with)
 /**
  * @swagger
  * /api/users/suggestions/users:
@@ -210,7 +208,6 @@ router.post('/unfollow/:id', authenticate, isUser, userController.unfollowCompan
  */
 router.get('/suggestions/users', authenticate, isUser, userController.getUserSuggestions);
 
-// Get company suggestions (companies to follow)
 /**
  * @swagger
  * /api/users/suggestions/companies:
@@ -249,7 +246,6 @@ router.get('/suggestions/companies', authenticate, isUser, userController.getCom
  */
 router.get('/resume/download', authenticate, isUser, userController.generateResumePDF);
 
-// --- Job related endpoints for users ---
 
 /**
  * @swagger
@@ -326,22 +322,18 @@ router.get('/jobs/expiring', authenticate, isUser, userController.getExpiringJob
  */
 router.get('/companies/hiring', authenticate, isUser, userController.getHiringCompanies);
 
-// --- Experiences CRUD ---
 router.post('/experiences', authenticate, isUser, userController.addExperience);
 router.put('/experiences/:id', authenticate, isUser, userController.updateExperience);
 router.delete('/experiences/:id', authenticate, isUser, userController.deleteExperience);
 
-// --- Projects CRUD ---
 router.post('/projects', authenticate, isUser, userController.addProject);
 router.put('/projects/:id', authenticate, isUser, userController.updateProject);
 router.delete('/projects/:id', authenticate, isUser, userController.deleteProject);
 
-// --- Skills CRUD ---
 router.post('/skills', authenticate, isUser, userController.addSkill);
 router.put('/skills/:id', authenticate, isUser, userController.updateSkill);
 router.delete('/skills/:id', authenticate, isUser, userController.deleteSkill);
 
-// --- Certificates CRUD ---
 router.post('/certificates', authenticate, isUser, userController.addCertificate);
 router.put('/certificates/:id', authenticate, isUser, userController.updateCertificate);
 router.delete('/certificates/:id', authenticate, isUser, userController.deleteCertificate);

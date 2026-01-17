@@ -12,10 +12,10 @@ const connectDB = async () => {
     
     await mongoose.connection.db.admin().command({ ping: 1 });
 
-    console.log("✅ Successfully connected to MongoDB Atlas (Database: linkedin)!");
+    console.log("Connected to MongoDB Atlas ");
     
   } catch (error) {
-    console.error("❌ MongoDB Connection Error:", error);
+    console.error("MongoDB Connection error:", error);
     process.exit(1);
   }
 };

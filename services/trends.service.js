@@ -1,21 +1,12 @@
 const mongoose = require('mongoose');
 const Post = mongoose.models.Post || require('../models/post.model');
 const JobOffer = mongoose.models.JobOffer || require('../models/JobOffer.model');
-
-/**
- * Get trending topics/hashtags from recent posts
- */
 exports.getTrendingTopics = async (limit = 5) => {
   try {
-    // Get posts from last 24 hours
     const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
-    // Fetch recent posts
     const recentPosts = await Post.find({
       createdAt: { $gte: last24Hours }
     }).select('content').lean();
-    
-    // Extract hashtags from posts
     const hashtagCount = {};
     
     recentPosts.forEach(post => {
@@ -25,8 +16,6 @@ exports.getTrendingTopics = async (limit = 5) => {
         hashtagCount[cleanTag] = (hashtagCount[cleanTag] || 0) + 1;
       });
     });
-    
-    // Get top hashtags
     const topHashtags = Object.entries(hashtagCount)
       .map(([tag, count]) => ({ 
         tag, 
@@ -35,8 +24,6 @@ exports.getTrendingTopics = async (limit = 5) => {
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, limit);
-    
-    // If we don't have enough trending hashtags, add some default/fallback ones
     if (topHashtags.length < limit) {
       const fallbackTrends = [
         { tag: '#AlinBusiness', count: 12500, posts: '12.5K posts', isDefault: true },
@@ -48,8 +35,6 @@ exports.getTrendingTopics = async (limit = 5) => {
         { tag: '#Networking', count: 3200, posts: '3.2K posts', isDefault: true },
         { tag: '#WorkLifeBalance', count: 2900, posts: '2.9K posts', isDefault: true }
       ];
-      
-      // Fill remaining spots with defaults (excluding duplicates)
       const existingTags = new Set(topHashtags.map(t => t.tag));
       fallbackTrends.forEach(trend => {
         if (topHashtags.length < limit && !existingTags.has(trend.tag)) {
@@ -58,8 +43,6 @@ exports.getTrendingTopics = async (limit = 5) => {
         }
       });
     }
-    
-    // Add ranking
     const trendingTopics = topHashtags.map((topic, index) => ({
       ...topic,
       rank: index + 1
@@ -73,8 +56,6 @@ exports.getTrendingTopics = async (limit = 5) => {
     
   } catch (error) {
     console.error('Error in getTrendingTopics service:', error);
-    
-    // Return default trends on error
     const defaultTrends = [
       { tag: '#AlinBusiness', posts: '12.5K posts', count: 12500, rank: 1, isDefault: true },
       { tag: '#RemoteWork', posts: '8.2K posts', count: 8200, rank: 2, isDefault: true },
@@ -91,10 +72,6 @@ exports.getTrendingTopics = async (limit = 5) => {
     };
   }
 };
-
-/**
- * Get trending job categories
- */
 exports.getTrendingJobCategories = async () => {
   try {
     const jobCategories = await JobOffer.aggregate([
@@ -124,8 +101,6 @@ exports.getTrendingJobCategories = async () => {
         }
       }
     ]);
-    
-    // Add fallback if needed
     if (jobCategories.length === 0) {
       jobCategories.push(
         { category: 'Software Development', jobs: '1.2K jobs', count: 1200 },
@@ -146,10 +121,6 @@ exports.getTrendingJobCategories = async () => {
     throw error;
   }
 };
-
-/**
- * Get trending companies (most active posters)
- */
 exports.getTrendingCompanies = async () => {
   try {
     const trendingCompanies = await Post.aggregate([
@@ -206,10 +177,6 @@ exports.getTrendingCompanies = async () => {
     throw error;
   }
 };
-
-/**
- * Get all trending data for feed (single endpoint)
- */
 exports.getFeedTrends = async () => {
   try {
     const trendingTopics = await this.getTrendingTopics(5);
@@ -223,8 +190,6 @@ exports.getFeedTrends = async () => {
     };
   } catch (error) {
     console.error('Error in getFeedTrends service:', error);
-    
-    // Return defaults on error
     return {
       success: true,
       data: {
@@ -242,9 +207,6 @@ exports.getFeedTrends = async () => {
   }
 };
 
-/**
- * Helper function to format counts (e.g., 12500 → "12.5K")
- */
 function formatCount(count) {
   if (count >= 1000000) {
     return (count / 1000000).toFixed(1) + 'M posts';

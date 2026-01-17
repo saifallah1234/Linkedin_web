@@ -1,10 +1,7 @@
-// utils/jobDescriptionAI.js
 const Groq = require('groq-sdk');
 const groqClient = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
-
-// Generate AI-powered job description
 async function generateJobDescription(jobData, maxTokens = 500) {
   const { title, requirements, skillsRequired, experienceLevel, type, location, salaryRange } = jobData;
   
@@ -43,12 +40,10 @@ Return only the generated job description.
 
     return completion.choices[0].message.content.trim();
   } catch (err) {
-    console.error("❌ Groq API error for job description:", err);
-    return null; // Return null to indicate failure
+    console.error("Groq API error for job description:", err);
+    return null;
   }
 }
-
-// Enhance existing job description
 async function enhanceJobDescription(existingDescription, jobData, maxTokens = 300) {
   const prompt = `
 You are an expert HR and recruitment specialist. Enhance the following job description to make it more professional, engaging, and effective at attracting qualified candidates.
@@ -83,8 +78,8 @@ Return only the enhanced job description.
 
     return completion.choices[0].message.content.trim();
   } catch (err) {
-    console.error("❌ Groq API error for enhancing description:", err);
-    return existingDescription; // Fallback to original
+    console.error("Groq API error for enhancing description:", err);
+    return existingDescription;
   }
 }
 

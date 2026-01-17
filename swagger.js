@@ -28,9 +28,7 @@ const options = {
       },
     ],
   },
-
-  // 👇 VERY IMPORTANT
-  apis: ["./routes/*.js"], // Swagger will scan all routes
+  apis: ["./routes/*.js"],
 };
 
 module.exports = swaggerJSDoc(options);

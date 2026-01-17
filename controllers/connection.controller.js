@@ -7,22 +7,15 @@ const notificationService = require('../services/notification.service');
 
 exports.sendConnectionRequest = async (req, res) => {
   try {
-    const requesterId = toStr(req.user.id);      // Me (string)
-    const receiverId = req.params.userId; // The person I want to connect with
-
-    // A. Prevent connecting to self
+    const requesterId = toStr(req.user.id);  
+    const receiverId = req.params.userId; 
     if (requesterId === toStr(receiverId)) {
       return res.status(400).json({ message: "You cannot connect with yourself." });
     }
-
-    // B. Check if Receiver exists
     const receiverExists = await User.findById(receiverId);
     if (!receiverExists) {
       return res.status(404).json({ message: "User not found." });
     }
-
-    // C. Check if connection already exists (using your DB index logic)
-    // We check for BOTH directions: A->B or B->A
     const existingConnection = await Connection.findOne({
       $or: [
         { requesterId: requesterId, receiverId: receiverId },
@@ -32,8 +25,6 @@ exports.sendConnectionRequest = async (req, res) => {
 
     if (existingConnection) {
       if (existingConnection.status === 'PENDING') {
-        // If the existing pending request is FROM the receiver to the requester,
-        // then the current user should accept/reject instead of sending a new one.
         if (toStr(existingConnection.requesterId) === receiverId) {
           return res.status(400).json({ message: "The user has already sent you a request. Please accept or reject it." });
         }
@@ -42,19 +33,13 @@ exports.sendConnectionRequest = async (req, res) => {
       if (existingConnection.status === 'ACCEPTED') {
         return res.status(400).json({ message: "You are already connected." });
       }
-      // If REJECTED, you might want to allow re-sending or block it. 
-      // For now, we block to avoid spam.
       return res.status(400).json({ message: "Connection request was previously rejected." });
     }
-
-    // D. Create the Request
     const newConnection = await Connection.create({
       requesterId,
       receiverId,
       status: 'PENDING'
     });
-
-    // Send notification to receiver
     try {
       await notificationService.createNotification(
         { id: receiverId, type: 'User' },
@@ -73,42 +58,27 @@ exports.sendConnectionRequest = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// --- 2. Accept or Reject Request ---
-// We use one function for both actions to keep code clean
 exports.respondToRequest = async (req, res) => {
   try {
     const { connectionId } = req.params;
-    const { action } = req.body; // Expecting { "action": "ACCEPTED" } or "REJECTED"
+    const { action } = req.body; 
     const currentUserId = toStr(req.user.id);
-
-    // A. Validate Action
     if (!['ACCEPTED', 'REJECTED'].includes(action)) {
       return res.status(400).json({ message: "Invalid action. Use ACCEPTED or REJECTED." });
     }
-
-    // B. Find the Connection
     const connection = await Connection.findById(connectionId);
     if (!connection) {
       return res.status(404).json({ message: "Connection request not found." });
     }
-
-    // C. SECURITY: Ensure ONLY the Receiver can accept/reject
     if (toStr(connection.receiverId) !== currentUserId) {
       return res.status(403).json({ message: "You are not authorized to respond to this request." });
     }
-
-    // D. Check status
     if (connection.status !== 'PENDING') {
       return res.status(400).json({ message: `Request is already ${connection.status.toLowerCase()}` });
     }
-
-    // E. Update Status
     connection.status = action;
     connection.respondedAt = new Date();
     await connection.save();
-
-    // Notify requester if accepted
     try {
       if (action === 'ACCEPTED') {
         await notificationService.createNotification(
@@ -130,7 +100,6 @@ exports.respondToRequest = async (req, res) => {
   }
 };
 
-// --- 3. Get My Pending Requests (Inbox) ---
 exports.getPendingRequests = async (req, res) => {
   try {
     const myId = new mongoose.Types.ObjectId(req.user.id);
@@ -139,7 +108,6 @@ exports.getPendingRequests = async (req, res) => {
       status: 'PENDING'
     }).lean();
 
-    // Manually populate requester details
     const normalized = await Promise.all(
       requests.map(async (r) => {
         let requester = null;
@@ -173,10 +141,8 @@ exports.getPendingRequests = async (req, res) => {
   }
 };
 
-// --- 4. Get My Connected Users (Friends List) ---
 exports.getMyConnections = async (req, res) => {
   try {
-    // 🔑 FORCE STRING — this is the key
     const userId = req.user.id.toString();
 
     console.log('AUTH USER ID (STRING):', userId);
@@ -193,13 +159,9 @@ exports.getMyConnections = async (req, res) => {
 
     const friends = await Promise.all(
       connections.map(async (conn) => {
-        // compare as strings to avoid ObjectId vs string issues
         const isRequester = toStr(conn.requesterId) === userId;
         const otherUserId = isRequester ? conn.receiverId : conn.requesterId;
-        
-        // Convert to string for User.findById (works with both string and ObjectId)
         const otherUserIdStr = otherUserId.toString();
-
         console.log('Resolving friend id:', otherUserIdStr);
 
         const user = await User.findById(otherUserIdStr).select('firstName lastName image');
@@ -217,21 +179,15 @@ exports.getMyConnections = async (req, res) => {
         };
       })
     );
-
-    // Filter out null values
     const filteredFriends = friends.filter(friend => friend !== null);
     
     console.log('Final friends list:', filteredFriends);
-
-    // Remove caching headers - they might be causing issues
     res.status(200).json(filteredFriends);
   } catch (error) {
     console.error('getMyConnections error:', error);
     res.status(500).json({ message: error.message });
   }
 };
-
-// --- Check Connection Status (for Profile View) ---
 exports.checkConnectionStatus = async (req, res) => {
   try {
     const currentUserId = toStr(req.user.id);
@@ -240,16 +196,12 @@ exports.checkConnectionStatus = async (req, res) => {
     if (!targetUserId) {
         return res.status(400).json({ message: "Target user ID is required" });
     }
-
-    // Check for existing connection in EITHER direction
     const connection = await Connection.findOne({
       $or: [
         { requesterId: currentUserId, receiverId: targetUserId },
         { requesterId: targetUserId, receiverId: currentUserId }
       ]
     });
-
-    // Case 1: No connection exists at all
     if (!connection) {
       return res.json({ 
         status: 'NONE', 
@@ -257,13 +209,10 @@ exports.checkConnectionStatus = async (req, res) => {
         connectionId: null 
       });
     }
-
-    // Case 2: Connection found
-    // 'isRequester' helps the UI decide whether to show "Request Sent" vs "Accept/Reject"
     const isRequester = toStr(connection.requesterId) === currentUserId;
 
     return res.json({
-      status: connection.status, // 'PENDING', 'ACCEPTED', 'REJECTED'
+      status: connection.status,
       isRequester: isRequester,
       connectionId: connection._id,
       requesterId: connection.requesterId,
@@ -275,15 +224,10 @@ exports.checkConnectionStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// --- Disconnect / Remove Any Connection ---
 exports.disconnect = async (req, res) => {
   try {
     const currentUserId = toStr(req.user.id);
     const targetUserId = req.params.userId;
-
-    // Remove the connection record regardless of its status (PENDING, ACCEPTED, REJECTED)
-    // This handles Unfriending, Canceling sent requests, and Rejecting received requests.
     const conn = await Connection.findOneAndDelete({
       $or: [
         { requesterId: currentUserId, receiverId: targetUserId },
@@ -294,8 +238,6 @@ exports.disconnect = async (req, res) => {
     if (!conn) {
       return res.status(404).json({ message: 'No connection found between these users.' });
     }
-
-    // Clean up any associated notifications to avoid dead links
     try {
         await notificationService.deleteNotification({
             recipient: targetUserId,

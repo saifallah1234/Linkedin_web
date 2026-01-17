@@ -4,7 +4,6 @@ const Company = require('../models/Company.model');
 
 const authenticate = async (req, res, next) => {
   try {
-    // Get token from Authorization header
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -23,11 +22,7 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Find user or company based on role in token
-    // Token format: { id, role, iat, exp }
     let account;
     if (decoded.role === 'User') {
       account = await User.findById(decoded.id).select('-password');
@@ -46,8 +41,6 @@ const authenticate = async (req, res, next) => {
         message: 'User not found'
       });
     }
-
-    // Attach user info to request
     req.user = {
       id: account._id,
       type: decoded.role,
@@ -78,8 +71,6 @@ const authenticate = async (req, res, next) => {
     });
   }
 };
-
-// Middleware to check if user is author of a resource
 const isAuthor = (model, paramName = 'id') => {
   return async (req, res, next) => {
     try {
@@ -92,8 +83,6 @@ const isAuthor = (model, paramName = 'id') => {
           message: 'Resource not found'
         });
       }
-
-      // Check if current user is the author
       const isAuthorized = 
         resource.author && 
         resource.author.id.equals(req.user.id) && 
@@ -105,8 +94,6 @@ const isAuthor = (model, paramName = 'id') => {
           message: 'Not authorized to modify this resource'
         });
       }
-
-      // Attach resource to request for use in controller
       req.resource = resource;
       next();
     } catch (error) {
@@ -119,8 +106,6 @@ const isAuthor = (model, paramName = 'id') => {
     }
   };
 };
-
-// Optional: Check if user is company
 const isCompany = (req, res, next) => {
   if (req.user.type !== 'Company') {
     return res.status(403).json({
@@ -130,8 +115,6 @@ const isCompany = (req, res, next) => {
   }
   next();
 };
-
-// Optional: Check if user is regular user
 const isUser = (req, res, next) => {
   if (req.user.type !== 'User') {
     return res.status(403).json({
